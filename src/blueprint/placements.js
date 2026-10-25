@@ -18,8 +18,8 @@ export const DEFAULT_OPTIONS = Object.freeze({
   pad: 0, // extra empty tiles around the footprint
 });
 
-const GRID_COLOR = 0x3a3a3a;
-const PIN_COLOR = 0x2b2b2b;
+const GRID_COLOR = 0x8f8f8f; // unpainted print grey
+const PIN_COLOR = 0x6a6a6a;
 
 export function buildPlacements(normalized, options = {}) {
   const opt = { ...DEFAULT_OPTIONS, ...options };
@@ -120,7 +120,7 @@ export function buildPlacements(normalized, options = {}) {
     for (let x = bounds.minX; x < bounds.maxX; x++) {
       for (let y = bounds.minY; y < bounds.maxY; y++) {
         if (covered.has(`${x},${y}`)) continue;
-        pieces.push({ key: 'tile/empty', x: x + 0.5, y: y + 0.5, rotation: 0, color: 0x454545, entityId: null, group: 'tile' });
+        pieces.push({ key: 'tile/empty', x: x + 0.5, y: y + 0.5, rotation: 0, color: 0x6f6f6f, entityId: null, group: 'tile' });
       }
     }
   }

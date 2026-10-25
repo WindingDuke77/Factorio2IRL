@@ -28,7 +28,7 @@ export function createScene(canvas) {
   controls.zoomToCursor = true;
   controls.target.set(0, 0, 0);
 
-  const hemi = new THREE.HemisphereLight(0xffe6c0, 0x2a2018, 0.9);
+  const hemi = new THREE.HemisphereLight(0xfff2dc, 0x3a3028, 1.1);
   scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff1d6, 2.2);
   sun.position.set(18, 30, 12);
@@ -45,7 +45,7 @@ export function createScene(canvas) {
   // Ground + grid helper (1 tile spacing).
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(400, 400),
-    new THREE.MeshStandardMaterial({ color: 0x241c15, roughness: 1, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ color: 0x2a2118, roughness: 1, metalness: 0 }),
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.01;
@@ -81,7 +81,7 @@ export function createScene(canvas) {
   function frame(bounds, view = 'iso') {
     const w = Math.max(bounds?.w ?? 6, 1);
     const h = Math.max(bounds?.h ?? 6, 1);
-    const radius = Math.max(w, h) * 0.75 + 3;
+    const radius = Math.max(w, h) * 0.62 + 2;
     const dist = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     controls.target.set(0, 0.4, 0);
     if (view === 'top') {

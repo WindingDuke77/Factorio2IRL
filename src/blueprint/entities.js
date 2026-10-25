@@ -9,9 +9,9 @@ const BELT_COLORS = {
   3: 0x3d9be9, // blue
   4: 0x43c45a, // green (turbo, Space Age)
 };
-const BASE_GREY = 0x6e6e6e;
-const TILE_GREY = 0x4b4b4b;
-const WALL_GREY = 0x9aa0a6;
+const BASE_GREY = 0x7a7a7a;
+const TILE_GREY = 0x6f6f6f;
+const WALL_GREY = 0xa5a9ad;
 
 /** @type {Record<string, object>} */
 const DEFS = {};

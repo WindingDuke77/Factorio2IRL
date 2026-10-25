@@ -5,165 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Factorio2IRL — blueprint to 3D print</title>
     <meta name="description" content="Paste a Factorio blueprint string, see it in 3D built from Wube's official 3D-print models, and get the list of parts to print." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://cdn.factorio.com/assets/fonts/titillium-web.css" rel="stylesheet" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23313031'/%3E%3Crect x='4' y='4' width='24' height='24' rx='3' fill='%23e39827'/%3E%3Cpath d='M9 22V10h12v3h-8v2h7v3h-7v4z' fill='%23201810'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body class="flex min-h-screen flex-col">
-    <!-- Top bar -->
-    <div class="w-full bg-black/50">
-      <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-2 px-4 py-2 text-sm">
-        <div class="flex flex-wrap items-center gap-4">
-          <a href="https://www.printables.com/@WubeSoftware/models" target="_blank" rel="noopener">Official models on Printables</a>
+  <body>
+    <!-- Top bar, as on factorio.com -->
+    <div id="top" class="top-bar">
+      <div class="top-bar-inner">
+        <div class="sites links flex flex-items-baseline flex-wrap">
+          <a href="./" class="sites-current">Factorio2IRL</a>
+          <span class="separator separator-blue">|</span>
+          <a href="https://www.printables.com/@WubeSoftware/models" target="_blank" rel="noopener">Official 3D models</a>
+          <span class="separator separator-blue">|</span>
           <a href="https://www.factorio.com/blog/post/fff-447" target="_blank" rel="noopener">FFF #447</a>
+          <span class="separator separator-blue">|</span>
           <a href="https://wiki.factorio.com/Blueprint_string_format" target="_blank" rel="noopener">Blueprint string format</a>
         </div>
-        <div class="flex items-center gap-4">
-          <a href="?gallery" title="Every converted piece laid out for inspection">Piece gallery</a>
-          <a id="link-repo" href="https://github.com/WindingDuke77/Factorio2IRL" target="_blank" rel="noopener">GitHub</a>
+        <div class="user-controls links flex flex-items-baseline flex-end">
+          <a href="?gallery">Piece gallery</a>
+          <span class="separator separator-blue">|</span>
+          <a href="https://github.com/WindingDuke77/Factorio2IRL" target="_blank" rel="noopener">GitHub</a>
         </div>
       </div>
     </div>
 
-    <!-- Header -->
-    <header class="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-3">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 class="f-wordmark">Factorio <span class="accent">→</span> IRL</h1>
-          <p class="mt-1 text-f-cream/80">Paste a blueprint string. See it built from Wube's official 3D-print models. Get the parts to print.</p>
+    <!-- Header: logo + nav buttons -->
+    <div class="header">
+      <div class="header-inner flex-wrap">
+        <a href="./" class="header-logo flex items-end gap-3">
+          <img src="https://cdn.factorio.com/assets/img/web/factorio-logo2.png" alt="Factorio" />
+          <span class="f-wordmark"><span class="accent">→</span> IRL</span>
+        </a>
+        <div class="header-links">
+          <div class="dropdown">
+            <a class="button flex flex-space-between" href="?sample=splitter"><div>Samples</div><div>▾</div></a>
+            <div class="submenu" id="sample-menu"></div>
+          </div>
+          <a class="button" href="?gallery">Piece gallery</a>
+          <a class="button button-green" href="https://www.printables.com/@WubeSoftware/models" target="_blank" rel="noopener">Get the models</a>
         </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <p class="m-0 text-f-cream/90">Paste a blueprint string. See it built from Wube's official 3D-print models. Get the parts to print.</p>
         <div id="header-stats" class="flex gap-2"></div>
       </div>
-    </header>
 
-    <!-- Main -->
-    <main class="mx-auto grid w-full max-w-[1600px] flex-1 grid-cols-1 gap-4 px-4 pb-6 lg:grid-cols-[330px_minmax(0,1fr)] xl:grid-cols-[330px_minmax(0,1fr)_400px]">
-      <!-- Left column -->
-      <div class="flex flex-col gap-4">
-        <section class="f-panel">
-          <h2 class="f-panel-title">Blueprint</h2>
-          <textarea id="bp-input" class="f-textarea" spellcheck="false" placeholder="Paste a blueprint string (starts with 0eNq…) or raw blueprint JSON here"></textarea>
-          <div class="mt-2 flex flex-wrap items-center gap-2">
-            <button id="btn-render" class="f-button f-button-green">Render</button>
-            <button id="btn-paste" class="f-button" title="Read the clipboard and render">Paste &amp; render</button>
-            <button id="btn-clear" class="f-button f-button-sm ml-auto">Clear</button>
-          </div>
-          <div class="mt-3">
-            <label class="f-label" for="sample-select">Or load a sample</label>
-            <div class="flex gap-2">
-              <select id="sample-select" class="f-select"></select>
-              <button id="btn-sample" class="f-button">Load</button>
-            </div>
-          </div>
-          <div id="bp-error" class="f-alert mt-3 hidden"></div>
-        </section>
-
-        <section id="book-panel" class="f-panel hidden">
-          <h2 class="f-panel-title">Blueprint book</h2>
-          <div id="book-list" class="f-hole max-h-56 overflow-auto p-1"></div>
-        </section>
-
-        <section class="f-panel">
-          <h2 class="f-panel-title">Print options</h2>
-          <div class="flex flex-col gap-3">
-            <div>
-              <span class="f-label">Fit variant</span>
-              <div class="f-inset flex gap-4">
-                <label class="f-check"><input type="radio" name="variant" value="precision" checked /> High precision</label>
-                <label class="f-check"><input type="radio" name="variant" value="clearance" /> High clearance</label>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="f-label" for="opt-endStyle">Belt ends</label>
-                <select id="opt-endStyle" class="f-select">
-                  <option value="long">Long caps</option>
-                  <option value="medium">Medium caps</option>
-                  <option value="short">Short caps</option>
-                  <option value="none">Plain straight</option>
-                </select>
-              </div>
-              <div>
-                <label class="f-label" for="opt-inserterHand">Inserter hand</label>
-                <select id="opt-inserterHand" class="f-select">
-                  <option value="closed">Closed</option>
-                  <option value="open">Open</option>
-                </select>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="f-label" for="opt-pad">Border (tiles)</label>
-                <input id="opt-pad" class="f-input" type="number" min="0" max="10" value="0" />
-              </div>
-              <div class="flex flex-col justify-end gap-1">
-                <label class="f-check"><input id="opt-fillEmpty" type="checkbox" checked /> Fill empty cells</label>
-                <label class="f-check"><input id="opt-includeGrid" type="checkbox" checked /> Grid base plates</label>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="f-panel">
-          <h2 class="f-panel-title">View</h2>
-          <div class="flex flex-col gap-2">
-            <label class="f-check"><input id="view-bodies" type="checkbox" checked /> Show entity models</label>
-            <label class="f-check"><input id="view-tiles" type="checkbox" checked /> Show tiles</label>
-            <label class="f-check"><input id="view-grid" type="checkbox" checked /> Show grid plates</label>
-          </div>
-        </section>
-      </div>
-
-      <!-- Centre: 3D view -->
-      <section class="f-panel flex min-h-[520px] flex-col lg:min-h-[calc(100vh-210px)]">
-        <h2 class="f-panel-title">
-          <span id="view-title">3D view</span>
-          <span class="flex gap-1">
-            <button id="btn-view-iso" class="f-button f-button-sm" title="Isometric view">Iso</button>
-            <button id="btn-view-top" class="f-button f-button-sm" title="Top-down view">Top</button>
-            <button id="btn-view-front" class="f-button f-button-sm" title="Front view">Front</button>
-          </span>
-        </h2>
-        <div id="canvas-wrap" class="f-hole relative min-h-0 flex-1 overflow-hidden rounded-sm">
-          <canvas id="view" class="block h-full w-full"></canvas>
-          <div id="view-empty" class="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-f-cream/70">
-            <div>
-              <div class="text-2xl font-black text-f-cream">Nothing to show yet</div>
-              <div class="mt-1">Paste a blueprint string on the left, or load a sample.</div>
-            </div>
-          </div>
-          <div id="view-loading" class="pointer-events-none absolute right-3 bottom-3 hidden rounded bg-black/60 px-3 py-1 text-sm text-f-cream">Loading models…</div>
-        </div>
-        <div id="view-notes" class="mt-2 flex flex-wrap gap-2 text-xs text-f-muted"></div>
-      </section>
-
-      <!-- Right: parts list -->
-      <section class="f-panel lg:col-span-2 xl:col-span-1">
-        <h2 class="f-panel-title">
-          <span>Parts to print</span>
-          <span class="flex gap-1">
-            <button id="btn-copy-text" class="f-button f-button-sm" title="Copy as text">Copy</button>
-            <button id="btn-download-csv" class="f-button f-button-sm" title="Download CSV">CSV</button>
-          </span>
-        </h2>
-        <div id="bom-summary" class="mb-3 grid grid-cols-3 gap-2"></div>
-        <div id="bom-body" class="flex flex-col gap-3 text-sm">
-          <p class="text-f-muted">The parts list appears here once a blueprint is rendered.</p>
-        </div>
-      </section>
-    </main>
-
-    <footer class="mt-auto w-full bg-black/40">
-      <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-f-muted">
+      <main class="grid grid-cols-1 gap-3 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_340px]">
+        <!-- Left column -->
         <div>
-          3D models by <a href="https://www.printables.com/@WubeSoftware/models" target="_blank" rel="noopener">Wube Software</a>, licensed
-          <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC</a>. Factorio is a trademark of Wube Software. This is a fan tool, not affiliated with Wube.
+          <div class="panel">
+            <h2>Blueprint</h2>
+            <textarea id="bp-input" class="f-textarea" spellcheck="false" placeholder="Paste a blueprint string (starts with 0eNq…) or raw blueprint JSON here"></textarea>
+            <div class="mt-2 flex flex-wrap items-center gap-y-2">
+              <button id="btn-render" class="button button-green" type="button">Render</button>
+              <button id="btn-paste" class="button" type="button" title="Read the clipboard and render">Paste &amp; render</button>
+              <button id="btn-clear" class="button button-small ml-auto" type="button">Clear</button>
+            </div>
+            <div class="mt-3">
+              <label class="f-label" for="sample-select">Or load a sample</label>
+              <div class="flex gap-2">
+                <select id="sample-select" class="f-select"></select>
+                <button id="btn-sample" class="button button-small" type="button" style="height: 36px">Load</button>
+              </div>
+            </div>
+            <div id="bp-error" class="f-alert mt-3 hidden"></div>
+          </div>
+
+          <div id="book-panel" class="panel hidden">
+            <h2>Blueprint book</h2>
+            <div id="book-list" class="panel-hole max-h-56 overflow-auto p-1"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Print options</h2>
+            <div class="flex flex-col gap-3">
+              <div>
+                <span class="f-label">Fit variant</span>
+                <div class="panel-inset m-0 flex gap-4">
+                  <label class="f-check"><input type="radio" name="variant" value="precision" checked /> High precision</label>
+                  <label class="f-check"><input type="radio" name="variant" value="clearance" /> High clearance</label>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="f-label" for="opt-endStyle">Belt ends</label>
+                  <select id="opt-endStyle" class="f-select">
+                    <option value="long">Long caps</option>
+                    <option value="medium">Medium caps</option>
+                    <option value="short">Short caps</option>
+                    <option value="none">Plain straight</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="f-label" for="opt-inserterHand">Inserter hand</label>
+                  <select id="opt-inserterHand" class="f-select">
+                    <option value="closed">Closed</option>
+                    <option value="open">Open</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="f-label" for="opt-pad">Border (tiles)</label>
+                  <input id="opt-pad" class="f-input" type="number" min="0" max="10" value="0" />
+                </div>
+                <div class="flex flex-col justify-end gap-1">
+                  <label class="f-check"><input id="opt-fillEmpty" type="checkbox" checked /> Fill empty cells</label>
+                  <label class="f-check"><input id="opt-includeGrid" type="checkbox" checked /> Grid base plates</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>View</h2>
+            <div class="flex flex-col gap-2">
+              <label class="f-check"><input id="view-bodies" type="checkbox" checked /> Show entity models</label>
+              <label class="f-check"><input id="view-tiles" type="checkbox" checked /> Show tiles</label>
+              <label class="f-check"><input id="view-grid" type="checkbox" checked /> Show grid plates</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Centre: 3D view -->
+        <div class="panel flex min-h-[520px] flex-col lg:sticky lg:top-3 lg:h-[calc(100vh-24px)] lg:self-start">
+          <div class="flex items-center justify-between gap-2">
+            <h2 id="view-title" class="mb-0! truncate">3D view</h2>
+            <ul class="tabs tabs-for-panel m-0!">
+              <li><a id="btn-view-iso" href="#" class="active">Iso</a></li>
+              <li><a id="btn-view-top" href="#">Top</a></li>
+              <li><a id="btn-view-front" href="#">Front</a></li>
+            </ul>
+          </div>
+          <div id="canvas-wrap" class="f-canvas-wrap relative mt-3 min-h-0 flex-1 overflow-hidden">
+            <canvas id="view" class="block h-full w-full"></canvas>
+            <div id="view-empty" class="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center">
+              <div>
+                <div class="text-2xl font-black text-f-cream">Nothing to show yet</div>
+                <div class="mt-1 text-f-muted">Paste a blueprint string on the left, or load a sample.</div>
+              </div>
+            </div>
+            <div id="view-loading" class="pointer-events-none absolute right-3 bottom-3 hidden bg-black/60 px-3 py-1 text-sm text-f-cream">Loading models…</div>
+          </div>
+          <div id="view-notes" class="mt-2 flex flex-wrap gap-2 text-xs text-f-muted"></div>
+        </div>
+
+        <!-- Right: parts list -->
+        <div class="panel lg:col-span-2 xl:col-span-1">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="mb-0!">Parts to print</h2>
+            <span class="flex gap-1">
+              <button id="btn-copy-text" class="button button-small" type="button" title="Copy as text">Copy</button>
+              <button id="btn-download-csv" class="button button-small" type="button" title="Download CSV">CSV</button>
+            </span>
+          </div>
+          <div id="bom-summary" class="my-3 grid grid-cols-3 gap-2"></div>
+          <div id="bom-body" class="flex flex-col gap-3">
+            <p class="text-f-muted">The parts list appears here once a blueprint is rendered.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="footer">
+      <div class="flex flex-wrap items-center justify-between gap-2 py-4 text-xs text-f-muted">
+        <div>
+          3D models by <a href="https://www.printables.com/@WubeSoftware/models" target="_blank" rel="noopener">Wube Software</a>,
+          <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC</a>. Factorio and its artwork are © Wube Software. Unofficial fan tool, not affiliated with Wube.
         </div>
         <div>1 tile = <span id="mm-per-tile">25</span> mm</div>
       </div>
-    </footer>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -57,6 +57,20 @@ async function init() {
     sel.appendChild(opt);
   }
   $('btn-sample').addEventListener('click', () => loadSample(sel.value));
+  const menu = $('sample-menu');
+  for (const s of samples) {
+    const a = document.createElement('a');
+    a.className = 'button';
+    a.href = `?sample=${s.id}`;
+    a.textContent = s.label;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      sel.value = s.id;
+      loadSample(s.id);
+      history.replaceState(null, '', `?sample=${s.id}`);
+    });
+    menu.appendChild(a);
+  }
 
   $('btn-render').addEventListener('click', () => renderFromText($('bp-input').value));
   $('bp-input').addEventListener('keydown', (e) => {
@@ -93,9 +107,13 @@ async function init() {
   bindView('view-tiles', 'showTiles');
   bindView('view-grid', 'showGrid');
 
-  $('btn-view-iso').addEventListener('click', () => scene.frame(state.placements?.bounds, 'iso'));
-  $('btn-view-top').addEventListener('click', () => scene.frame(state.placements?.bounds, 'top'));
-  $('btn-view-front').addEventListener('click', () => scene.frame(state.placements?.bounds, 'front'));
+  for (const view of ['iso', 'top', 'front']) {
+    $(`btn-view-${view}`).addEventListener('click', (e) => {
+      e.preventDefault();
+      scene.frame(state.placements?.bounds, view);
+      for (const v of ['iso', 'top', 'front']) $(`btn-view-${v}`).classList.toggle('active', v === view);
+    });
+  }
 
   $('btn-copy-text').addEventListener('click', async () => {
     if (!state.bom) return;
@@ -177,7 +195,7 @@ function renderBookList() {
   state.flat.forEach((entry, i) => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'block w-full rounded px-2 py-1 text-left text-sm hover:bg-white/10';
+    btn.className = 'f-book-item';
     btn.dataset.index = String(i);
     const count = entry.blueprint.entities?.length ?? 0;
     btn.innerHTML = `<span class="font-bold">${escapeHtml(entry.label)}</span> <span class="text-f-muted">· ${count} entities</span>`;
@@ -189,8 +207,7 @@ function renderBookList() {
 function highlightBook() {
   for (const b of $('book-list').querySelectorAll('button')) {
     const active = Number(b.dataset.index) === state.selected;
-    b.classList.toggle('bg-f-orange/25', active);
-    b.classList.toggle('text-f-cream', active);
+    b.classList.toggle('active', active);
   }
 }
 

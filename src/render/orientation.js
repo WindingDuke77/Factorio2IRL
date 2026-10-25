@@ -108,6 +108,6 @@ export const STACK_ON = {
 };
 
 /** How far (in tiles) a body sinks into its tile's pocket. */
-export const BODY_INSET = 0.05;
+export const BODY_INSET = 0.02;
 /** How far a tile sinks into the grid plate. */
-export const TILE_INSET = 0.06;
+export const TILE_INSET = 0.0;

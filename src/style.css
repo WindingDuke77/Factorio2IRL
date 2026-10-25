@@ -1,338 +1,236 @@
+/* Layer order: factorio.com's own rules sit between Tailwind's base and its utilities, so the
+   site look applies everywhere but Tailwind utility classes can still adjust layout. */
+@layer theme, base, site, components, utilities;
 @import 'tailwindcss';
+@import './factorio-site.css';
 
 @theme {
   --font-sans: 'Titillium Web', ui-sans-serif, system-ui, sans-serif;
-
-  --color-f-bg: #201810;
-  --color-f-panel: #313031;
-  --color-f-panel-border: #2e2623;
-  --color-f-panel-shadow: #201815;
-  --color-f-inset: #414040;
-  --color-f-inset-dark: #2b2a2b;
-  --color-f-hole: #1f1e1f;
-  --color-f-row-odd: #3b3a3b;
-  --color-f-row-even: #424142;
+  --color-f-cream: #ffe6c0;
   --color-f-orange: #e39827;
   --color-f-orange-bright: #ffa200;
-  --color-f-cream: #ffe6c0;
   --color-f-link: #7dcaed;
   --color-f-green: #5eb663;
-  --color-f-green-dark: #376d3b;
   --color-f-red: #ff5555;
-  --color-f-button: #8e8e8e;
-  --color-f-text-dark: #1d1c1d;
   --color-f-muted: #a6a6a6;
-}
-
-@layer base {
-  html {
-    height: 100%;
-  }
-  body {
-    min-height: 100%;
-    margin: 0;
-    color: #fff;
-    font-family: var(--font-sans);
-    background-color: var(--color-f-bg);
-    /* Dark brushed texture in the spirit of factorio.com's background, generated in CSS. */
-    background-image:
-      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 162, 0, 0.1), transparent 70%),
-      repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 7px),
-      repeating-linear-gradient(45deg, rgba(255, 230, 192, 0.025) 0 1px, transparent 1px 9px),
-      linear-gradient(180deg, #241b12 0%, #1b140e 60%, #15100b 100%);
-    background-attachment: fixed;
-  }
-  a {
-    color: var(--color-f-link);
-    text-decoration: none;
-  }
-  a:hover {
-    color: #fff;
-  }
-  h1,
-  h2,
-  h3 {
-    font-weight: 900;
-    line-height: 1.1;
-  }
-  ::selection {
-    background: rgba(227, 152, 39, 0.5);
-  }
+  --color-f-panel: #313031;
+  --color-f-inset: #414040;
+  --color-f-hole: #1f1e1f;
 }
 
 @layer components {
-  /* --- Panels (copied bevel recipes from factorio.com main.css) ------------- */
-  .f-panel {
-    background-color: var(--color-f-panel);
-    border: 4px solid var(--color-f-panel-border);
-    box-shadow: 0 0 3px 0 var(--color-f-panel-shadow);
-    padding: 12px;
+  /* factorio.com is 1200px wide; this app needs room for three columns. Same chrome, wider. */
+  .top-bar-inner,
+  .header-inner,
+  .container,
+  .footer {
+    width: 1600px;
+    max-width: 100%;
   }
-  .f-panel-title {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--color-f-cream);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: -2px 0 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #111;
-    box-shadow: 0 1px 0 0 #4b4a4b;
-    display: flex;
-    align-items: center;
+  .panel {
+    margin-top: 0;
+  }
+
+  /* Small utilities factorio.com uses in its markup but defines elsewhere. */
+  .flex-items-baseline {
+    align-items: baseline;
+  }
+  .flex-end {
+    justify-content: flex-end;
+  }
+  .flex-space-between {
     justify-content: space-between;
-    gap: 8px;
   }
-  .f-inset {
-    background-color: var(--color-f-inset);
-    box-shadow:
-      inset 0 0 3px 0 #000,
-      0 -2px 2px -1px #000,
-      -2px 0 2px -2px #0f0d0c,
-      2px 0 2px -2px #0f0d0c,
-      0 2px 2px -2px #ebe6e4;
-    padding: 8px;
-  }
-  .f-hole {
-    background-color: var(--color-f-hole);
-    box-shadow:
-      inset 0 2px 2px -1px #000,
-      inset 0 0 2px 0 #181616,
-      inset 0 -2px 2px -2px #777,
-      0 0 2px 0 #2b2b2b;
+  .flex-wrap {
+    flex-wrap: wrap;
   }
 
-  /* --- Buttons ---------------------------------------------------------- */
-  .f-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 36px;
-    padding: 6px 14px;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-f-text-dark);
-    background: var(--color-f-button);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    box-shadow:
-      inset 0 4px 1px -2px #c5c5c5,
-      inset 0 -4px 1px -2px #2d2d2d,
-      inset 2px 0 1px 0 #5f5f5f,
-      inset -2px 0 1px 0 #5f5f5f,
-      0 0 4px 1px #2e2521;
-    transition: filter 0.08s ease, transform 0.05s ease;
-  }
-  .f-button:hover {
-    filter: brightness(1.12);
-  }
-  .f-button:active {
-    transform: translateY(2px);
-    box-shadow:
-      inset 0 4px 1px -2px #2d2d2d,
-      inset 0 -4px 1px -2px #c5c5c5,
-      inset 2px 0 1px 0 #5f5f5f,
-      inset -2px 0 1px 0 #5f5f5f,
-      0 0 2px 0 #2e2521;
-  }
-  .f-button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    filter: none;
-  }
-  .f-button-green {
-    background: var(--color-f-green);
-    color: #062a0a;
-    box-shadow:
-      inset 0 4px 1px -2px #9ee4a2,
-      inset 0 -4px 1px -2px #1f4a23,
-      inset 2px 0 1px 0 #3f8a45,
-      inset -2px 0 1px 0 #3f8a45,
-      0 0 4px 1px #2e2521;
-  }
-  .f-button-orange {
-    background: var(--color-f-orange);
-    color: #2a1600;
-    box-shadow:
-      inset 0 4px 1px -2px #ffd38a,
-      inset 0 -4px 1px -2px #7a4a0a,
-      inset 2px 0 1px 0 #b8781a,
-      inset -2px 0 1px 0 #b8781a,
-      0 0 4px 1px #2e2521;
-  }
-  .f-button-sm {
+  /* Our own additions, styled with the site's palette. */
+  .button-small {
+    min-width: 0;
     height: 28px;
-    padding: 2px 10px;
-    font-size: 0.85rem;
+    padding: 5px 10px;
+    margin-right: 0;
+    font-size: 90%;
   }
-
-  /* --- Form controls ---------------------------------------------------- */
-  .f-textarea,
-  .f-select,
-  .f-input {
-    width: 100%;
-    font-family: inherit;
-    font-size: 0.9rem;
-    color: #fff;
-    background-color: var(--color-f-hole);
-    border: none;
-    border-radius: 3px;
-    padding: 8px;
-    box-shadow:
-      inset 0 2px 2px -1px #000,
-      inset 0 0 2px 0 #181616,
-      inset 0 -2px 2px -2px #777;
-    outline: none;
+  .button-small:active {
+    padding-top: 7px;
+    padding-bottom: 3px;
   }
-  .f-textarea:focus,
-  .f-select:focus,
-  .f-input:focus {
-    box-shadow:
-      inset 0 2px 2px -1px #000,
-      inset 0 0 2px 0 #181616,
-      inset 0 -2px 2px -2px #777,
-      0 0 0 2px rgba(227, 152, 39, 0.6);
+  .button-block {
+    display: block;
+    min-width: 0;
+    margin-right: 0;
+    text-align: left;
   }
-  .f-textarea {
-    resize: vertical;
-    min-height: 120px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.75rem;
-    word-break: break-all;
-  }
-  .f-select {
-    appearance: none;
-    padding-right: 28px;
-    background-image: linear-gradient(45deg, transparent 50%, #ffe6c0 50%), linear-gradient(135deg, #ffe6c0 50%, transparent 50%);
-    background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%;
-    background-size: 5px 5px, 5px 5px;
-    background-repeat: no-repeat;
-  }
-  .f-check {
+  .button.flex {
     display: flex;
     align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 0.95rem;
   }
-  .f-check input {
-    accent-color: var(--color-f-orange);
-    width: 16px;
-    height: 16px;
+  .submenu .button {
+    margin: 0 0 2px 0;
+    min-width: 200px;
   }
+
   .f-label {
     display: block;
-    font-size: 0.8rem;
+    font-size: 80%;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-f-muted);
     margin-bottom: 4px;
   }
-
-  /* --- Tables / lists --------------------------------------------------- */
-  .f-table {
+  .f-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .f-check input {
+    accent-color: var(--color-f-orange);
+    width: 16px;
+    height: 16px;
+  }
+  .f-select,
+  .f-input {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 2px;
-    font-size: 0.9rem;
-  }
-  .f-table th {
-    text-align: left;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-f-muted);
-    padding: 2px 6px;
-  }
-  .f-table td {
-    background-color: var(--color-f-inset);
-    padding: 5px 6px;
+    font-family: inherit;
+    font-size: 100%;
+    line-height: 1.2;
+    height: 36px;
+    color: #000;
+    background: #8e8e8e;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 8px;
     box-shadow:
-      inset 0 0 4px 0 #2d2d2d,
-      0 -1px 1px -1px #888,
-      0 1px 1px -1px #000;
+      inset 0 4px 1px -2px #000,
+      inset 0 -4px 1px -2px #c5c5c5,
+      inset 2px 0 1px 0 #5f5f5f,
+      inset -2px 0 1px 0 #5f5f5f,
+      inset 0 -2px 2px 0 #5f5f5f,
+      0 0 4px 1px #2e2521;
+    outline: none;
   }
-  .f-table tr:nth-child(even) td {
-    background-color: var(--color-f-row-even);
+  .f-select:focus,
+  .f-input:focus {
+    background: #f0dab4;
   }
-  .f-table td.qty {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    color: var(--color-f-cream);
-    width: 3.5rem;
+  .f-select {
+    appearance: none;
+    padding-right: 28px;
+    background-image: linear-gradient(45deg, transparent 50%, #1d1c1d 50%), linear-gradient(135deg, #1d1c1d 50%, transparent 50%);
+    background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+  textarea.f-textarea {
+    height: 150px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 72%;
+    line-height: 1.3;
+    word-break: break-all;
   }
 
   .f-stat {
-    background-color: var(--color-f-inset-dark);
-    box-shadow: inset 0 0 3px 0 #000;
-    padding: 6px 8px;
-    border-radius: 2px;
+    background-color: #242324;
+    box-shadow:
+      inset 0 2px 2px -1px #000,
+      inset 0 0 2px 0 #181616,
+      inset 0 -2px 2px -2px #777;
+    padding: 6px 10px;
+    min-width: 96px;
   }
   .f-stat .value {
-    font-size: 1.3rem;
+    font-size: 150%;
     font-weight: 900;
     color: var(--color-f-orange-bright);
-    line-height: 1;
+    line-height: 1.1;
   }
   .f-stat .label {
-    font-size: 0.7rem;
+    font-size: 70%;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--color-f-muted);
   }
 
+  .f-note {
+    background-color: rgba(36, 35, 36, 0.6);
+    border-left: 3px solid var(--color-f-orange);
+    padding: 6px 10px;
+    font-size: 90%;
+    color: var(--color-f-cream);
+  }
   .f-alert {
     background-color: rgba(100, 35, 35, 0.6);
     border: 2px solid #642323;
     color: #ffd0d0;
     padding: 8px 10px;
-    font-size: 0.9rem;
-  }
-  .f-note {
-    background-color: rgba(36, 35, 36, 0.6);
-    border-left: 3px solid var(--color-f-orange);
-    padding: 6px 10px;
-    font-size: 0.85rem;
-    color: var(--color-f-cream);
+    font-size: 90%;
   }
 
-  .f-swatch {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
-    margin-right: 6px;
-    vertical-align: middle;
+  table.panel-hole td.qty {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--color-f-cream);
+    width: 3.5rem;
+    white-space: nowrap;
+  }
+  table.panel-hole th {
+    text-align: left;
+    font-size: 75%;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-f-muted);
+    padding: 4px 6px;
+  }
+  table.panel-hole td {
+    padding: 4px 6px;
   }
 
   .f-wordmark {
     font-weight: 900;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-size: 220%;
     letter-spacing: 0.02em;
-    color: #fff;
-    text-shadow:
-      0 2px 0 #3a2a14,
-      0 6px 12px rgba(0, 0, 0, 0.6);
+    color: var(--color-f-cream);
     text-transform: uppercase;
+    text-shadow: 0 2px 0 #3a2a14, 0 6px 12px rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
   }
   .f-wordmark .accent {
     color: var(--color-f-orange-bright);
   }
-}
 
-/* Scrollbars */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #5a5a5a #262526;
+  .f-book-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 4px 8px;
+    color: #fff;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  .f-book-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .f-book-item.active {
+    background: rgba(227, 152, 39, 0.3);
+    color: var(--color-f-cream);
+  }
+
+  .f-canvas-wrap {
+    background: #1a1410;
+    box-shadow:
+      inset 0 2px 2px -1px #000,
+      inset 0 0 2px 0 #181616,
+      inset 0 -2px 2px -2px #777,
+      0 0 2px 0 #2b2b2b;
+  }
 }
 
 details > summary {
@@ -350,4 +248,8 @@ details > summary .chev::before {
 }
 details[open] > summary .chev::before {
   content: '▾';
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #5a5a5a #262526;
 }

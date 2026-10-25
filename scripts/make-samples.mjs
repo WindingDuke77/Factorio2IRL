@@ -131,7 +131,39 @@ function book(children) {
   };
 }
 
+// --- Sample D: one splitter inside a wall ring (minimal test) ----------------------
+function splitterInWalls() {
+  n = 0;
+  const E = [];
+  // belts in from the south, splitter, belts out to the north (all facing north)
+  E.push(ent('transport-belt', 1.5, 3.5, { direction: 0 }));
+  E.push(ent('transport-belt', 2.5, 3.5, { direction: 0 }));
+  E.push(ent('splitter', 2, 2.5, { direction: 0 }));
+  E.push(ent('transport-belt', 1.5, 1.5, { direction: 0 }));
+  E.push(ent('transport-belt', 2.5, 1.5, { direction: 0 }));
+  // wall ring x 0..4, y 0..5
+  for (let x = 0; x <= 4; x++) {
+    E.push(ent('stone-wall', x + 0.5, 0.5));
+    E.push(ent('stone-wall', x + 0.5, 5.5));
+  }
+  for (let y = 1; y <= 4; y++) {
+    E.push(ent('stone-wall', 0.5, y + 0.5));
+    E.push(ent('stone-wall', 4.5, y + 0.5));
+  }
+  return {
+    blueprint: {
+      item: 'blueprint',
+      label: 'Splitter in walls',
+      description: 'One splitter with belts in and out, inside a wall ring.',
+      icons: [{ signal: { name: 'splitter' }, index: 1 }],
+      entities: E,
+      version: V2,
+    },
+  };
+}
+
 const samples = [
+  { id: 'splitter', label: 'Splitter in walls (minimal)', json: splitterInWalls() },
   { id: 'belts', label: 'Belt playground', json: beltPlayground() },
   { id: 'smelting', label: 'Smelting line', json: smeltingLine() },
   { id: 'legacy', label: 'Legacy 1.1 corner', json: legacyCorner() },

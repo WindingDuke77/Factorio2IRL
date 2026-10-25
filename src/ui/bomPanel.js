@@ -14,7 +14,7 @@ export function renderHeaderStats({ bom, entities }) {
   ];
   for (const [value, label] of stats) {
     const div = document.createElement('div');
-    div.className = 'f-stat min-w-[96px]';
+    div.className = 'f-stat';
     div.innerHTML = `<div class="value">${value}</div><div class="label">${label}</div>`;
     el.appendChild(div);
   }
@@ -54,7 +54,7 @@ export function renderBomPanel({ bom, label, missingKeys = [] }) {
   for (const set of bom.sets) {
     const details = document.createElement('details');
     details.open = true;
-    details.className = 'f-inset';
+    details.className = 'panel-inset m-0';
     const sum = document.createElement('summary');
     sum.className = 'flex items-center justify-between gap-2';
     sum.innerHTML = `<span><span class="chev"></span><b class="text-f-cream">${escapeHtml(set.setName.replace(/^Factorio /, ''))}</b> <span class="text-f-muted">· ${set.total} parts</span></span>
@@ -62,7 +62,7 @@ export function renderBomPanel({ bom, label, missingKeys = [] }) {
     details.appendChild(sum);
 
     const table = document.createElement('table');
-    table.className = 'f-table mt-2';
+    table.className = 'panel-hole mt-2';
     let lastGroup = null;
     for (const row of set.rows) {
       if (row.group !== lastGroup) {
@@ -85,10 +85,10 @@ export function renderBomPanel({ bom, label, missingKeys = [] }) {
   if (bom.missing.length) {
     const details = document.createElement('details');
     details.open = true;
-    details.className = 'f-inset';
+    details.className = 'panel-inset m-0';
     details.innerHTML = `<summary><span class="chev"></span><b class="text-f-red">No official model yet</b> <span class="text-f-muted">· shown as placeholders</span></summary>`;
     const table = document.createElement('table');
-    table.className = 'f-table mt-2';
+    table.className = 'panel-hole mt-2';
     for (const m of bom.missing) {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td class="qty">${m.count}×</td><td>${escapeHtml(m.label)} <span class="text-xs text-f-muted">${m.w}×${m.h}${m.unknown ? ' · unknown entity' : ''}</span></td>`;
