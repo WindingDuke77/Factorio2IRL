@@ -77,7 +77,7 @@ function partMatrix(part, geo) {
  * @returns {Promise<{ group: THREE.Group, missingKeys: string[] }>}
  */
 export async function buildBlueprintGroup(placements, view = {}) {
-  const show = { showBodies: true, showTiles: true, showGrid: true, showMissing: false, ...view };
+  const show = { showBodies: true, showTiles: false, showGrid: true, showMissing: false, ...view };
   const manifest = await loadManifest();
   const group = new THREE.Group();
   const { bounds } = placements;

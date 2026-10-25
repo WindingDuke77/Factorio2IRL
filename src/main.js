@@ -24,7 +24,7 @@ const state = {
   group: null,
   options: { ...DEFAULT_OPTIONS },
   variant: 'precision',
-  view: { showBodies: true, showTiles: true, showGrid: true, showMissing: false }, // entity tiles drawn, filler tiles only counted
+  view: { showBodies: true, showTiles: false, showGrid: true, showMissing: false }, // tiles are counted in the parts list, not drawn
   mmPerTile: 25,
   missingKeys: [],
   buildToken: 0,
