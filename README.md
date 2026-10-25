@@ -6,6 +6,9 @@ Paste a Factorio blueprint string, see it rendered in 3D out of Wube Software's 
 - Decodes blueprint strings (1.x and 2.0) and blueprint books, or raw blueprint JSON.
 - Resolves belt shapes (straight / turn / start / end / underground / splitter) and wall
   junctions the same way the game does, then picks the matching printed piece.
+- Blueprint books: every blueprint in the book (nested books too) is listed; the book's active
+  entry opens first. Planner entries are ignored.
+- Puts Wube's printable belt items on the belts, auto-detected from the blueprint when possible.
 - Renders everything with three.js using Wube's STLs converted to compact GLB files.
 - Produces a parts list grouped by Printables model set: entity models, shaped tiles, grid base
   plates and pins, with the High Precision / High Clearance variant you choose, plus a list of
@@ -48,8 +51,16 @@ npm run models        # = fetch-models + convert-models
   23.9 mm so they drop into the plates.
 - Every belt tile is a *Bottom* (base with rollers) plus a *Top* (chevron surface), snapped into a
   shaped *Tile*, which pins into a *Grid* base plate. Pin counts in the parts list are estimates.
-- The small electric pole STL is a print plate of loose parts, so the 3D view draws a simple
-  stand-in for it; the parts list still names the real file.
+- Three STLs are print plates of loose parts: the electric mining drill (frame, drill bit, rod,
+  head, legs, rails, pipes), the steel furnace (body + six pipes) and the small electric pole
+  (base + two flat profiles that cross). `convert-models` splits them into connected components
+  (`drill/*`, `steel-furnace/body`, `pole/*`) and `src/render/orientation.js` assembles them.
+- Inserter arms are printed flat and folded at two hex hinges (see Wube's assembly guide); the
+  loader folds them the same way (`foldArm` in `src/render/models.js`).
+- Belt items (gear, circuit, copper cable, plate, steel plate, science bottle) are placed two per
+  lane on straight belts. "Auto" picks the item from the blueprint's recipes, filters, logistic
+  requests and icons; you can also force one item or a mix.
+- Wall corners, T- and X-junctions each take one "Walls Fill-In" plug.
 - `src/render/orientation.js` documents how each model is oriented in its own file (belts flow
   east, turn pieces pivot at the NW corner, underground hoods are modelled standing on their
   mouth, inserter arms are flat side profiles, "Ending N" walls have the free end facing north).
