@@ -121,7 +121,6 @@ export function installDevCycler({ onLoad }) {
   anchor?.parentElement?.insertBefore(panel, anchor);
   // Keep the 3D view close: hide the Blueprint and Print options panels in dev mode.
   anchor?.classList.add('hidden');
-  document.getElementById('opt-endStyle')?.closest('.panel')?.classList.add('hidden');
 
   const select = panel.querySelector('#dev-select');
   scenarios.forEach((s, i) => {

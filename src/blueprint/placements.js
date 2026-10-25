@@ -17,6 +17,7 @@ export const DEFAULT_OPTIONS = Object.freeze({
   inserterHand: 'closed', // 'closed' | 'open'
   fillEmpty: true, // put an Empty Tile on every uncovered cell inside the footprint
   includeGrid: true, // add grid base plates + pins
+  chestsOpen: false, // draw chests with the lid off / propped open
   beltItems: 'auto', // 'none' | 'auto' | 'mixed' | an id from BELT_ITEMS
   detectedItem: null, // item id found in the blueprint (used when beltItems === 'auto')
   pad: 0, // extra empty tiles around the footprint
@@ -105,8 +106,16 @@ export function buildPlacements(normalized, options = {}) {
         cover(e);
         break;
       }
+      case 'chest': {
+        const open = Boolean(opt.chestsOpen) && d.bodyOpen;
+        push(open ? d.bodyOpen : d.body, e, 'body', d.color);
+        const lid = open ? d.lidOpen : d.lidClosed;
+        if (lid) push(lid, e, 'body', d.color);
+        push(d.tile, e, 'tile', d.tileColor);
+        cover(e);
+        break;
+      }
       case 'machine':
-      case 'chest':
       case 'pole': {
         push(d.body, e, 'body', d.color);
         push(d.tile, e, 'tile', d.tileColor);

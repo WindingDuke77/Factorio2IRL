@@ -8,7 +8,7 @@ import { listUserModels } from './printables-api.mjs';
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'catalog.json');
 
 const DECOR_SETS = new Set(['1801974', '1801972', '1801966', '1801978', '1801957', '1807994']);
-const CHEST_RENDER = new Set(['wooden-closed', 'iron-closed', 'steel-closed', 'logistics-closed']);
+const CHEST_RENDER = new Set(['wooden-closed', 'iron-closed', 'steel-closed', 'logistics-closed', 'wooden-open', 'iron-open', 'steel-open', 'logistics-open', 'wooden-lid', 'iron-lid', 'steel-lid', 'logistics-lid-open', 'logistics-lid-closed']);
 
 /** "Walls T-Junction N.stl" -> "walls-t-junction-n" */
 export function slugify(name) {

@@ -67,6 +67,17 @@ export const PIECE_ROTATION = {
 export const PIECE_TILT = {
   'belt/underground-in-top': { z: 90 },
   'belt/underground-out-top': { z: 90 },
+  // Open chest lids are propped up at the back hinge.
+  'chest/wooden-lid': { x: -72 },
+  'chest/iron-lid': { x: -72 },
+  'chest/steel-lid': { x: -72 },
+};
+
+/** Offset (tiles, in the piece's own frame) applied after re-centring, e.g. to move a lid to its hinge. */
+export const PIECE_OFFSET = {
+  'chest/wooden-lid': [0, -0.02, -0.3],
+  'chest/iron-lid': [0, -0.02, -0.29],
+  'chest/steel-lid': [0, -0.02, -0.27],
 };
 
 /**
@@ -74,16 +85,17 @@ export const PIECE_TILT = {
  * Chains are followed (items sit on belt tops, which sit on belt bottoms).
  */
 export const STACK_ON = {
-  'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.12 },
-  'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.12 },
-  'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.12 },
+  // The chevron top rests on the ledge 3.25 mm up inside the 7 mm belt base.
+  'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.15 },
+  'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.15 },
+  'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.15 },
   'belt/underground-in-top': { on: 'belt/underground-in-bottom', inset: 0.2 },
   'belt/underground-out-top': { on: 'belt/underground-out-bottom', inset: 0.2 },
   'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.02 },
-  'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.12 },
-  'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.12 },
-  'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.12 },
-  'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.12 },
+  'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.15 },
+  'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.15 },
+  'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.15 },
+  'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.15 },
   'inserter/basic-closed': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/basic-open': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/long-closed': { on: 'inserter/base-single', inset: 0.1 },
@@ -92,6 +104,11 @@ export const STACK_ON = {
   'inserter/bulk-open': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/stack-closed': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/stack-open': { on: 'inserter/base-single', inset: 0.1 },
+  'chest/wooden-lid': { on: 'chest/wooden-open', inset: 0.02 },
+  'chest/iron-lid': { on: 'chest/iron-open', inset: 0.02 },
+  'chest/steel-lid': { on: 'chest/steel-open', inset: 0.02 },
+  'chest/logistics-lid-closed': { on: 'chest/logistics-closed', inset: 0.09 },
+  'chest/logistics-lid-open': { on: 'chest/logistics-open', inset: 0.06 },
   'item/gear': { on: 'belt/straight-top', inset: 0.01 },
   'item/circuit': { on: 'belt/straight-top', inset: 0.01 },
   'item/copper-cable': { on: 'belt/straight-top', inset: 0.01 },
@@ -119,10 +136,12 @@ export const COMPOSITES = {
     { key: 'drill/bit', pos: [0, 0.1, 0] },
     { key: 'drill/rod', pos: [0, 0.8, 0] },
     { key: 'drill/head', pos: [0, 1.42, 0] },
-    { key: 'drill/leg', from: [-0.3, 1.55, -0.15], to: [-1.2, 0.3, -1.2], t: 0.3 },
-    { key: 'drill/leg', from: [0.3, 1.55, -0.15], to: [1.2, 0.3, -1.2], t: 0.3 },
-    { key: 'drill/rail', from: [-0.3, 1.55, -0.15], to: [-1.2, 0.3, -1.2], t: 0.78 },
-    { key: 'drill/rail', from: [0.3, 1.55, -0.15], to: [1.2, 0.3, -1.2], t: 0.78 },
+    // The frame is an L of two rails; the legs run from the head down to the two rail ends,
+    // which build.js finds from the frame geometry (see railEnds()).
+    { key: 'drill/leg', from: 'head', to: 'railEnd0', t: 0.3 },
+    { key: 'drill/leg', from: 'head', to: 'railEnd1', t: 0.3 },
+    { key: 'drill/rail', from: 'head', to: 'railEnd0', t: 0.78 },
+    { key: 'drill/rail', from: 'head', to: 'railEnd1', t: 0.78 },
   ],
 };
 
@@ -133,7 +152,12 @@ export const COMPOSITES = {
  */
 export const RAW_FRAME = /^wall\//;
 
-/** How far (in tiles) a body sinks into its tile's pocket. */
-export const BODY_INSET = 0.02;
-/** How far a tile sinks into the grid plate. */
-export const TILE_INSET = 0.0;
+/**
+ * Stacking levels measured from the STLs (1 tile = 25 mm):
+ *   grid plate = 2 mm slab + 1.5 mm rim, so a tile drops into a pocket whose floor is 2 mm up;
+ *   tiles are 2 mm thick; shaped tiles have a 1 mm pocket the model base (or the inserter's
+ *   feet) sits in; the Empty Tile is solid, so chests and poles sit on its top.
+ */
+export const TILE_FLOOR = 0.08; // pocket floor of the grid plate
+export const TILE_THICK = 0.08; // tile thickness
+export const TILE_POCKET = 0.04; // floor of a shaped tile's pocket

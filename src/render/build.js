@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { getGeometry, loadManifest, ANCHORED } from './models.js';
-import { PIECE_ROTATION, PIECE_TILT, STACK_ON, COMPOSITES, RAW_FRAME, BODY_INSET, TILE_INSET } from './orientation.js';
+import { PIECE_ROTATION, PIECE_TILT, PIECE_OFFSET, STACK_ON, COMPOSITES, RAW_FRAME, TILE_FLOOR, TILE_THICK, TILE_POCKET } from './orientation.js';
 
 const DEG = Math.PI / 180;
 
@@ -51,15 +51,56 @@ export function localTransform(key, geo, info = null, mmPerTile = 25) {
   if (ANCHORED.has(key)) return { tilt, offset };
   const tilted = box.clone().applyMatrix4(tilt);
   offset.set(-(tilted.min.x + tilted.max.x) / 2, -tilted.min.y, -(tilted.min.z + tilted.max.z) / 2);
+  const extra = PIECE_OFFSET[key];
+  if (extra) offset.add(new THREE.Vector3(...extra));
   return { tilt, offset };
 }
 
+/**
+ * The drill frame is an L of two rails: the bbox corner with the fewest vertices is the open
+ * side, its opposite is the L's corner, and the other two corners are the rail ends.
+ */
+function railEnds(frameGeo) {
+  const b = frameGeo.boundingBox;
+  const corners = [
+    [b.min.x, b.min.z], [b.max.x, b.min.z], [b.min.x, b.max.z], [b.max.x, b.max.z],
+  ];
+  const counts = [0, 0, 0, 0];
+  const pos = frameGeo.attributes.position;
+  for (let i = 0; i < pos.count; i += 3) {
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    corners.forEach((c, k) => {
+      if (Math.abs(x - c[0]) < 0.6 && Math.abs(z - c[1]) < 0.6) counts[k]++;
+    });
+  }
+  const open = counts.indexOf(Math.min(...counts));
+  const lCorner = 3 - open;
+  return corners
+    .map((c, k) => ({ c, k }))
+    .filter(({ k }) => k !== open && k !== lCorner)
+    .map(({ c }) => new THREE.Vector3(c[0] * 0.82, 0.35, c[1] * 0.82));
+}
+
+/** Resolve symbolic anchors ('head', 'railEnd0', ...) for composite parts. */
+function resolveAnchor(ref, ctx) {
+  if (Array.isArray(ref)) return new THREE.Vector3(...ref);
+  if (ref === 'head') return new THREE.Vector3(0, 1.55, 0);
+  if (ref === 'railEnd0' || ref === 'railEnd1') return ctx.railEnds?.[ref === 'railEnd0' ? 0 : 1] ?? new THREE.Vector3(0, 0.35, -1.2);
+  return new THREE.Vector3();
+}
+
 /** Local matrix for a composite part: either pos/rot, or aligned along a from→to line. */
-function partMatrix(part, geo) {
+function partMatrix(part, geo, ctx = {}) {
   const m = new THREE.Matrix4();
   if (part.from) {
-    const from = new THREE.Vector3(...part.from);
-    const to = new THREE.Vector3(...part.to);
+    const to = resolveAnchor(part.to, ctx);
+    let from = resolveAnchor(part.from, ctx);
+    if (part.from === 'head') {
+      // Start from the side of the head that faces the target.
+      const d = new THREE.Vector3(to.x, 0, to.z).normalize();
+      from = from.clone().add(d.multiplyScalar(0.3));
+    }
     const dir = to.clone().sub(from).normalize();
     const centre = from.clone().lerp(to, part.t ?? 0.5);
     // Align the part's longest axis with the line.
@@ -83,7 +124,7 @@ function partMatrix(part, geo) {
  * @returns {Promise<{ group: THREE.Group, missingKeys: string[] }>}
  */
 export async function buildBlueprintGroup(placements, view = {}) {
-  const show = { showBodies: true, showTiles: false, showGrid: true, showMissing: false, ...view };
+  const show = { showBodies: true, showTiles: true, showGrid: true, showMissing: false, ...view };
   const manifest = await loadManifest();
   const group = new THREE.Group();
   const { bounds } = placements;
@@ -91,8 +132,15 @@ export async function buildBlueprintGroup(placements, view = {}) {
   const cy = bounds.minY + bounds.h / 2;
 
   const heightOf = (key) => manifest.pieces?.[key]?.size?.[1] ?? 0;
-  const plateH = Math.max(0, heightOf('grid/1x1') - TILE_INSET);
-  const tileH = Math.max(0, heightOf('tile/empty') - BODY_INSET);
+  // Which shaped tile each entity sits in (bodies sink into its pocket).
+  const tileByEntity = new Map();
+  for (const p of placements.pieces) if (p.group === 'tile' && p.entityId != null) tileByEntity.set(p.entityId, p.key);
+  const plateFloor = show.showGrid ? TILE_FLOOR : 0;
+  const bodyFloorFor = (entityId) => {
+    if (!show.showTiles) return plateFloor;
+    const tile = tileByEntity.get(entityId);
+    return plateFloor + (tile && tile !== 'tile/empty' ? TILE_POCKET : TILE_THICK);
+  };
   const stackBase = (key, depth = 0) => {
     const s = STACK_ON[key];
     if (!s || depth > 4) return 0;
@@ -104,10 +152,11 @@ export async function buildBlueprintGroup(placements, view = {}) {
   for (const p of placements.pieces) {
     if (p.group === 'hardware') continue;
     if ((p.group === 'body' || p.group === 'item') && !show.showBodies) continue;
-    if (p.group === 'tile' && (!show.showTiles || p.entityId == null)) continue; // filler tiles are counted, not drawn
+    if (p.group === 'tile' && !show.showTiles) continue;
     if (p.group === 'grid' && !show.showGrid) continue;
-    const k = `${p.key}|${p.color}`;
-    if (!buckets.has(k)) buckets.set(k, { key: p.key, color: p.color, group: p.group, items: [] });
+    const floor = p.group === 'tile' ? plateFloor : p.group === 'grid' ? 0 : bodyFloorFor(p.entityId);
+    const k = `${p.key}|${p.color}|${floor.toFixed(3)}`;
+    if (!buckets.has(k)) buckets.set(k, { key: p.key, color: p.color, group: p.group, floor, items: [] });
     buckets.get(k).items.push(p);
   }
 
@@ -116,9 +165,8 @@ export async function buildBlueprintGroup(placements, view = {}) {
   const mYaw = new THREE.Matrix4();
 
   const baseYFor = (b) => {
-    if (b.group === 'tile') return show.showGrid ? plateH : 0;
-    if (b.group === 'body' || b.group === 'item') return (show.showGrid ? plateH : 0) + (show.showTiles ? tileH : 0) + stackBase(b.key);
-    return 0;
+    if (b.group === 'body' || b.group === 'item') return b.floor + stackBase(b.key);
+    return b.floor;
   };
 
   const addInstances = (b, geo, local, baseY, rotOffset) => {
@@ -143,11 +191,16 @@ export async function buildBlueprintGroup(placements, view = {}) {
       const composite = COMPOSITES[b.key];
       if (composite) {
         let any = false;
+        const ctx = {};
+        if (b.key === 'electric-mining-drill') {
+          const frame = await getGeometry('drill/frame');
+          if (frame) ctx.railEnds = railEnds(frame);
+        }
         for (const part of composite) {
           const geo = await getGeometry(part.key);
           if (!geo) continue;
           any = true;
-          addInstances(b, geo, partMatrix(part, geo), baseY, rotOffset);
+          addInstances(b, geo, partMatrix(part, geo, ctx), baseY, rotOffset);
         }
         if (!any) missing.add(b.key);
         return;
@@ -164,7 +217,7 @@ export async function buildBlueprintGroup(placements, view = {}) {
   );
 
   // Placeholders: boxes with orange edges and a floating label (off by default).
-  const phBase = show.showGrid ? plateH : 0;
+  const phBase = plateFloor + (show.showTiles ? TILE_THICK : 0);
   for (const ph of show.showMissing ? placements.placeholders : []) {
     const h = 0.6;
     const box = new THREE.Mesh(new THREE.BoxGeometry(ph.w - 0.08, h, ph.h - 0.08), placeholderMat);

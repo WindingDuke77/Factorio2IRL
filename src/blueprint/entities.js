@@ -28,6 +28,9 @@ function def(name, props) {
     baseColor: props.baseColor ?? BASE_GREY,
     tileColor: props.tileColor ?? TILE_GREY,
     body: props.body ?? null, // single piece key or array of piece keys
+    bodyOpen: props.bodyOpen ?? null, // chest body with the lid off
+    lidOpen: props.lidOpen ?? null, // lid piece when open
+    lidClosed: props.lidClosed ?? null, // separate lid piece when closed (logistic chests)
     tile: props.tile ?? 'tile/empty',
     hasModel: props.hasModel ?? Boolean(props.body),
     maxUnderground: props.maxUnderground,
@@ -72,9 +75,9 @@ def('stone-furnace', { kind: 'machine', size: { w: 2, h: 2 }, color: 0x9a8a78, b
 def('steel-furnace', { kind: 'machine', size: { w: 2, h: 2 }, color: 0x9c9c9c, body: 'steel-furnace', tile: 'tile/steel-furnace' });
 
 // ---- Chests ------------------------------------------------------------
-def('wooden-chest', { kind: 'chest', color: 0x9c6b3c, body: 'chest/wooden-closed' });
-def('iron-chest', { kind: 'chest', color: 0x8c9196, body: 'chest/iron-closed' });
-def('steel-chest', { kind: 'chest', color: 0xb5b9bd, body: 'chest/steel-closed' });
+def('wooden-chest', { kind: 'chest', color: 0x9c6b3c, body: 'chest/wooden-closed', bodyOpen: 'chest/wooden-open', lidOpen: 'chest/wooden-lid' });
+def('iron-chest', { kind: 'chest', color: 0x8c9196, body: 'chest/iron-closed', bodyOpen: 'chest/iron-open', lidOpen: 'chest/iron-lid' });
+def('steel-chest', { kind: 'chest', color: 0xb5b9bd, body: 'chest/steel-closed', bodyOpen: 'chest/steel-open', lidOpen: 'chest/steel-lid' });
 const LOGISTIC = {
   'active-provider': 0x9b59b6,
   'passive-provider': 0xc0392b,
@@ -83,8 +86,9 @@ const LOGISTIC = {
   requester: 0x2980b9,
 };
 for (const [kind, color] of Object.entries(LOGISTIC)) {
-  def(`${kind}-chest`, { kind: 'chest', color, body: 'chest/logistics-closed' });
-  def(`logistic-chest-${kind}`, { kind: 'chest', color, body: 'chest/logistics-closed', label: prettify(`${kind}-chest`) });
+  const logi = { kind: 'chest', color, body: 'chest/logistics-closed', bodyOpen: 'chest/logistics-open', lidClosed: 'chest/logistics-lid-closed', lidOpen: 'chest/logistics-lid-open' };
+  def(`${kind}-chest`, logi);
+  def(`logistic-chest-${kind}`, { ...logi, label: prettify(`${kind}-chest`) });
 }
 
 // ---- Poles & walls -----------------------------------------------------

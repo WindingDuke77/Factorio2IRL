@@ -1,6 +1,6 @@
 {
   "mmPerTile": 25,
-  "generated": "2026-10-25T14:21:42.511Z",
+  "generated": "2026-10-25T22:50:16.686Z",
   "pieces": {
     "assembling-machine": {
       "file": "assembling-machine.glb",
@@ -818,6 +818,74 @@
         0.7225
       ]
     },
+    "chest/iron-lid": {
+      "file": "chest__iron-lid.glb",
+      "triangles": 10248,
+      "trianglesRaw": 10248,
+      "bboxRaw": {
+        "min": [
+          -45.42,
+          -27.176,
+          13.309
+        ],
+        "max": [
+          -27.99,
+          -11.862,
+          16.391
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3486,
+          0,
+          -0.3063
+        ],
+        "max": [
+          0.3486,
+          0.1233,
+          0.3063
+        ]
+      },
+      "size": [
+        0.6972,
+        0.1233,
+        0.6126
+      ]
+    },
+    "chest/iron-open": {
+      "file": "chest__iron-open.glb",
+      "triangles": 23848,
+      "trianglesRaw": 23848,
+      "bboxRaw": {
+        "min": [
+          -47.019,
+          -28.55,
+          0
+        ],
+        "max": [
+          -26.392,
+          -10.488,
+          13.315
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.4125,
+          0,
+          -0.3612
+        ],
+        "max": [
+          0.4125,
+          0.5326,
+          0.3612
+        ]
+      },
+      "size": [
+        0.8251,
+        0.5326,
+        0.7225
+      ]
+    },
     "chest/logistics-closed": {
       "file": "chest__logistics-closed.glb",
       "triangles": 33360,
@@ -850,6 +918,108 @@
         0.8447,
         0.6801,
         0.8211
+      ]
+    },
+    "chest/logistics-lid-closed": {
+      "file": "chest__logistics-lid-closed.glb",
+      "triangles": 12510,
+      "trianglesRaw": 12510,
+      "bboxRaw": {
+        "min": [
+          0.626,
+          83.764,
+          15.898
+        ],
+        "max": [
+          15.108,
+          96.174,
+          18.31
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.2896,
+          0,
+          -0.2482
+        ],
+        "max": [
+          0.2896,
+          0.0965,
+          0.2482
+        ]
+      },
+      "size": [
+        0.5793,
+        0.0965,
+        0.4964
+      ]
+    },
+    "chest/logistics-lid-open": {
+      "file": "chest__logistics-lid-open.glb",
+      "triangles": 10380,
+      "trianglesRaw": 10380,
+      "bboxRaw": {
+        "min": [
+          -149.212,
+          -26.236,
+          14.692
+        ],
+        "max": [
+          -134.73,
+          -13.825,
+          17.104
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.2896,
+          0,
+          -0.2482
+        ],
+        "max": [
+          0.2896,
+          0.0965,
+          0.2482
+        ]
+      },
+      "size": [
+        0.5793,
+        0.0965,
+        0.4965
+      ]
+    },
+    "chest/logistics-open": {
+      "file": "chest__logistics-open.glb",
+      "triangles": 20184,
+      "trianglesRaw": 20184,
+      "bboxRaw": {
+        "min": [
+          -127.692,
+          -30.295,
+          0.101
+        ],
+        "max": [
+          -106.574,
+          -9.766,
+          15.691
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.4224,
+          0,
+          -0.4106
+        ],
+        "max": [
+          0.4224,
+          0.6236,
+          0.4106
+        ]
+      },
+      "size": [
+        0.8447,
+        0.6236,
+        0.8212
       ]
     },
     "chest/steel-closed": {
@@ -886,6 +1056,74 @@
         0.6731
       ]
     },
+    "chest/steel-lid": {
+      "file": "chest__steel-lid.glb",
+      "triangles": 936,
+      "trianglesRaw": 936,
+      "bboxRaw": {
+        "min": [
+          -86.349,
+          -28.461,
+          14.553
+        ],
+        "max": [
+          -66.672,
+          -12.287,
+          16.785
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3935,
+          0,
+          -0.3235
+        ],
+        "max": [
+          0.3935,
+          0.0893,
+          0.3235
+        ]
+      },
+      "size": [
+        0.7871,
+        0.0893,
+        0.647
+      ]
+    },
+    "chest/steel-open": {
+      "file": "chest__steel-open.glb",
+      "triangles": 3476,
+      "trianglesRaw": 3476,
+      "bboxRaw": {
+        "min": [
+          -86.349,
+          -29.114,
+          0.146
+        ],
+        "max": [
+          -66.672,
+          -12.287,
+          14.553
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3935,
+          0,
+          -0.3365
+        ],
+        "max": [
+          0.3935,
+          0.5763,
+          0.3365
+        ]
+      },
+      "size": [
+        0.7871,
+        0.5763,
+        0.6731
+      ]
+    },
     "chest/wooden-closed": {
       "file": "chest__wooden-closed.glb",
       "triangles": 3176,
@@ -917,6 +1155,74 @@
       "size": [
         0.737,
         0.6465,
+        0.737
+      ]
+    },
+    "chest/wooden-lid": {
+      "file": "chest__wooden-lid.glb",
+      "triangles": 696,
+      "trianglesRaw": 696,
+      "bboxRaw": {
+        "min": [
+          -6.068,
+          -27.983,
+          15.495
+        ],
+        "max": [
+          12.358,
+          -9.557,
+          16.976
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3685,
+          0,
+          -0.3685
+        ],
+        "max": [
+          0.3685,
+          0.0593,
+          0.3685
+        ]
+      },
+      "size": [
+        0.737,
+        0.0593,
+        0.737
+      ]
+    },
+    "chest/wooden-open": {
+      "file": "chest__wooden-open.glb",
+      "triangles": 2736,
+      "trianglesRaw": 2736,
+      "bboxRaw": {
+        "min": [
+          -6.068,
+          -27.983,
+          0
+        ],
+        "max": [
+          12.358,
+          -9.557,
+          15.495
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3685,
+          0,
+          -0.3685
+        ],
+        "max": [
+          0.3685,
+          0.6198,
+          0.3685
+        ]
+      },
+      "size": [
+        0.737,
+        0.6198,
         0.737
       ]
     },

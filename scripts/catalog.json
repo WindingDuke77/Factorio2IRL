@@ -608,7 +608,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 512484,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/iron-lid-stopper",
@@ -634,7 +634,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 1192484,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/logistics-closed",
@@ -660,7 +660,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 625584,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/logistics-lid-open",
@@ -673,7 +673,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 519084,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/logistics-open",
@@ -686,7 +686,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 1009284,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/steel-closed",
@@ -712,7 +712,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 46884,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/steel-lid-stopper",
@@ -738,7 +738,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 173884,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/wooden-closed",
@@ -764,7 +764,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 34884,
-    "render": false
+    "render": true
   },
   {
     "key": "chest/wooden-lid-stopper",
@@ -790,7 +790,7 @@
     "folder": "Chests Open",
     "variant": null,
     "fileSize": 136884,
-    "render": false
+    "render": true
   },
   {
     "key": "decor/biter-attack-body",

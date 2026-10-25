@@ -54,8 +54,8 @@ npm run models        # = fetch-models + convert-models
   23.9 mm so they drop into the plates.
 - Every belt tile is a *Bottom* (base with rollers) plus a *Top* (chevron surface), snapped into a
   shaped *Tile*, which pins into a *Grid* base plate. Pin counts in the parts list are estimates.
-  The 3D view draws models directly on the grid plates; tiles are counted in the parts list but
-  not drawn.
+  The 3D view draws the same stack: grid plate, tiles (shaped ones under models, Empty Tiles
+  elsewhere), models on top. Tiles can be hidden with the "Show tiles" toggle.
 - Three STLs are print plates of loose parts: the electric mining drill (frame, drill bit, rod,
   head, legs, rails, pipes), the steel furnace (body + six pipes) and the small electric pole
   (base + two identical half-shells glued back to back). `convert-models` splits them into connected
@@ -68,6 +68,11 @@ npm run models        # = fetch-models + convert-models
   lane on straight belts. "Auto" picks the item from the blueprint's recipes, filters, logistic
   requests and icons; you can also force one item or a mix.
 - Wall corners, T- and X-junctions each take one "Walls Fill-In" plug.
+- Stacking heights come from the STLs: the grid plate is a 2 mm slab with a 1.5 mm rim, tiles
+  (2 mm) drop into that pocket, shaped tiles have a 1 mm pocket the model base sits in, and the
+  belt top rests on a ledge 3.25 mm up inside its base.
+- Chests can be drawn closed (one piece) or open (body + lid propped at the back hinge); logistic
+  chests always carry their separate lid plate. Both are counted in the parts list.
 - `src/render/orientation.js` documents how each model is oriented in its own file (belts flow
   east, turn pieces pivot at the NW corner, underground hoods are modelled standing on their
   mouth, inserter arms are flat side profiles, "Ending N" walls have the free end facing north).

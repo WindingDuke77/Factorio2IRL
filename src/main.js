@@ -24,7 +24,7 @@ const state = {
   group: null,
   options: { ...DEFAULT_OPTIONS },
   variant: 'precision',
-  view: { showBodies: true, showTiles: false, showGrid: true, showMissing: false }, // tiles are counted in the parts list, not drawn
+  view: { showBodies: true, showTiles: true, showGrid: true, showMissing: false }, // plate -> tile -> model, as in Wube's guide
   mmPerTile: 25,
   missingKeys: [],
   buildToken: 0,
@@ -104,11 +104,13 @@ async function init() {
   bindOption('opt-endStyle', 'endStyle', (v) => v);
   bindOption('opt-inserterHand', 'inserterHand', (v) => v);
   bindOption('opt-beltItems', 'beltItems', (v) => v);
+  bindOption('opt-chests', 'chestsOpen', (v) => v === 'open');
   bindOption('opt-pad', 'pad', (v) => Math.max(0, Math.min(10, Number(v) || 0)));
   bindOption('opt-fillEmpty', 'fillEmpty', (v, el) => el.checked);
   bindOption('opt-includeGrid', 'includeGrid', (v, el) => el.checked);
 
   bindView('view-bodies', 'showBodies');
+  bindView('view-tiles', 'showTiles');
   bindView('view-grid', 'showGrid');
   bindView('view-missing', 'showMissing');
 
