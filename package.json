@@ -1,0 +1,28 @@
+{
+  "name": "factorio2irl",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Paste a Factorio blueprint string, see it in 3D built from Wube's official 3D-print models, and get the list of parts to print.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test",
+    "fetch-models": "node scripts/fetch-models.mjs",
+    "convert-models": "node scripts/convert-models.mjs",
+    "models": "npm run fetch-models && npm run convert-models"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "meshoptimizer": "^1.3.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.5"
+  }
+}
