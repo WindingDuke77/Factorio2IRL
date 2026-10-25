@@ -56,9 +56,8 @@ export function getGeometry(key) {
           gltf.scene.updateMatrixWorld(true);
           gltf.scene.traverse((obj) => {
             if (obj.isMesh) {
-              const g = obj.geometry.clone();
+              const g = toFloatPositions(obj.geometry);
               g.applyMatrix4(obj.matrixWorld);
-              for (const name of Object.keys(g.attributes)) if (name !== 'position') g.deleteAttribute(name);
               geos.push(g);
             }
           });
@@ -77,6 +76,25 @@ export function getGeometry(key) {
     );
   }
   return geometryCache.get(key);
+}
+
+/**
+ * The GLBs are quantized (KHR_mesh_quantization: Int16 positions, dequantized by the node
+ * transform). Writing transformed floats back into an Int16 attribute clamps everything to ±1,
+ * so copy the positions into a Float32 attribute first (getX/Y/Z handle the normalisation).
+ */
+function toFloatPositions(geometry) {
+  const src = geometry.attributes.position;
+  const out = new Float32Array(src.count * 3);
+  for (let i = 0; i < src.count; i++) {
+    out[i * 3] = src.getX(i);
+    out[i * 3 + 1] = src.getY(i);
+    out[i * 3 + 2] = src.getZ(i);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(out, 3));
+  if (geometry.index) g.setIndex(geometry.index.clone());
+  return g;
 }
 
 export async function preload(keys) {
