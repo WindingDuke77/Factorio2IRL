@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { getGeometry, loadManifest, ANCHORED } from './models.js';
-import { PIECE_ROTATION, PIECE_TILT, STACK_ON, COMPOSITES, BODY_INSET, TILE_INSET } from './orientation.js';
+import { PIECE_ROTATION, PIECE_TILT, STACK_ON, COMPOSITES, RAW_FRAME, BODY_INSET, TILE_INSET } from './orientation.js';
 
 const DEG = Math.PI / 180;
 
@@ -34,10 +34,16 @@ const placeholderEdge = new THREE.LineBasicMaterial({ color: 0xffa200 });
  * point at y=0.
  * @returns {{ tilt: THREE.Matrix4, offset: THREE.Vector3 }}
  */
-export function localTransform(key, geo) {
+export function localTransform(key, geo, info = null, mmPerTile = 25) {
   const box = geo.boundingBox ?? (geo.computeBoundingBox(), geo.boundingBox);
   let tilt = new THREE.Matrix4();
   const offset = new THREE.Vector3();
+  if (RAW_FRAME.test(key) && info?.bboxRaw) {
+    // Undo the converter's bbox-centring: raw (x, y) -> world (x, -y), scaled to tiles.
+    const r = info.bboxRaw;
+    offset.set((r.min[0] + r.max[0]) / 2 / mmPerTile, -box.min.y, -((r.min[1] + r.max[1]) / 2) / mmPerTile);
+    return { tilt, offset };
+  }
   const fixed = PIECE_TILT[key];
   if (fixed) {
     tilt = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler((fixed.x ?? 0) * DEG, (fixed.y ?? 0) * DEG, (fixed.z ?? 0) * DEG, 'XYZ'));
@@ -151,7 +157,7 @@ export async function buildBlueprintGroup(placements, view = {}) {
         missing.add(b.key);
         return;
       }
-      const { tilt, offset } = localTransform(b.key, geo);
+      const { tilt, offset } = localTransform(b.key, geo, manifest.pieces?.[b.key], manifest.mmPerTile ?? 25);
       const local = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z).multiply(tilt);
       addInstances(b, geo, local, baseY, rotOffset);
     }),

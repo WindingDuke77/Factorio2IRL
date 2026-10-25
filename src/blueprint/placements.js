@@ -68,7 +68,7 @@ export function buildPlacements(normalized, options = {}) {
         const s = beltShapes.get(e.id);
         addBeltPieces(push, e, s, opt);
         const item = itemFor();
-        if (item) addBeltItems(pieces, e, s, item);
+        if (item && s.shape === 'straight') addBeltItems(pieces, e, s, item);
         beltCount++;
         cover(e);
         break;
@@ -182,7 +182,7 @@ function popcount(n) {
 function addBeltItems(pieces, e, s, item) {
   const fwd = DIR_VEC[e.direction];
   const right = DIR_VEC[rotateDirCW(e.direction)];
-  const spots = s.shape === 'straight' ? [[-0.24, -0.19], [0.24, -0.19], [-0.24, 0.19], [0.24, 0.19]] : [[0, -0.19], [0, 0.19]];
+  const spots = [[-0.24, -0.19], [0.24, -0.19], [-0.24, 0.19], [0.24, 0.19]];
   spots.forEach(([a, b], i) => {
     pieces.push({
       key: item.key,

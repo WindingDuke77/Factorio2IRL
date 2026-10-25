@@ -79,7 +79,7 @@ export const STACK_ON = {
   'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.12 },
   'belt/underground-in-top': { on: 'belt/underground-in-bottom', inset: 0.2 },
   'belt/underground-out-top': { on: 'belt/underground-out-bottom', inset: 0.2 },
-  'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.16 },
+  'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.02 },
   'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.12 },
   'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.12 },
   'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.12 },
@@ -110,8 +110,9 @@ export const COMPOSITES = {
   'steel-furnace': [{ key: 'steel-furnace/body', pos: [0, 0, 0] }],
   'small-electric-pole': [
     { key: 'pole/base', pos: [0, 0, 0] },
+    // Two identical half-profiles glued back to back make the round pole with one crossarm.
     { key: 'pole/profile', pos: [0, 0.62, 0], rot: [0, 0, 0] },
-    { key: 'pole/profile', pos: [0, 0.62, 0], rot: [0, 90, 0] },
+    { key: 'pole/profile', pos: [0, 0.62, 0], rot: [0, 180, 0] },
   ],
   'electric-mining-drill': [
     { key: 'drill/frame', pos: [0, 0, 0] },
@@ -124,6 +125,13 @@ export const COMPOSITES = {
     { key: 'drill/rail', from: [0.3, 1.55, -0.15], to: [1.2, 0.3, -1.2], t: 0.78 },
   ],
 };
+
+/**
+ * Pieces modelled in a shared frame around their tile (the tile is centred on the raw origin),
+ * where the raw X/Y offset must be kept instead of re-centring on the bounding box. Wall pins
+ * stick out on one side, so bbox-centring would shift every wall by up to 0.16 tiles.
+ */
+export const RAW_FRAME = /^wall\//;
 
 /** How far (in tiles) a body sinks into its tile's pocket. */
 export const BODY_INSET = 0.02;
