@@ -23,7 +23,7 @@ const state = {
   group: null,
   options: { ...DEFAULT_OPTIONS },
   variant: 'precision',
-  view: { showBodies: true, showTiles: true, showGrid: true },
+  view: { showBodies: true, showTiles: false, showGrid: true }, // tiles are printed but not drawn: models sit on the plates
   mmPerTile: 25,
   missingKeys: [],
   buildToken: 0,
@@ -106,7 +106,6 @@ async function init() {
   bindOption('opt-includeGrid', 'includeGrid', (v, el) => el.checked);
 
   bindView('view-bodies', 'showBodies');
-  bindView('view-tiles', 'showTiles');
   bindView('view-grid', 'showGrid');
 
   for (const view of ['iso', 'top', 'front']) {
