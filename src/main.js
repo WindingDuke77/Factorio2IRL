@@ -9,6 +9,7 @@ import { buildBlueprintGroup, disposeGroup } from './render/build.js';
 import { loadManifest } from './render/models.js';
 import { renderBomPanel, renderHeaderStats } from './ui/bomPanel.js';
 import { runGallery } from './render/gallery.js';
+import { detectItems, BELT_ITEMS } from './blueprint/items.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -99,6 +100,7 @@ async function init() {
   }
   bindOption('opt-endStyle', 'endStyle', (v) => v);
   bindOption('opt-inserterHand', 'inserterHand', (v) => v);
+  bindOption('opt-beltItems', 'beltItems', (v) => v);
   bindOption('opt-pad', 'pad', (v) => Math.max(0, Math.min(10, Number(v) || 0)));
   bindOption('opt-fillEmpty', 'fillEmpty', (v, el) => el.checked);
   bindOption('opt-includeGrid', 'includeGrid', (v, el) => el.checked);
@@ -180,7 +182,8 @@ async function renderFromText(text) {
     return;
   }
   renderBookList();
-  selectBlueprint(0);
+  const start = state.flat.findIndex((f) => f.active);
+  selectBlueprint(start >= 0 ? start : 0);
 }
 
 function renderBookList() {
@@ -226,7 +229,8 @@ function currentLabel() {
 
 function rebuild({ sceneToo = true, frame = false } = {}) {
   if (!state.normalized) return;
-  state.placements = buildPlacements(state.normalized, state.options);
+  state.detected = detectItems(state.normalized);
+  state.placements = buildPlacements(state.normalized, { ...state.options, detectedItem: state.detected.best });
   state.bom = buildBom(state.placements, { variant: state.variant, mmPerTile: state.mmPerTile });
   renderBomPanel({ bom: state.bom, label: currentLabel(), missingKeys: state.missingKeys });
   renderHeaderStats({ bom: state.bom, entities: state.normalized.entities.length });
@@ -262,6 +266,12 @@ function renderNotes() {
     `≈ ${Math.round(b.w * state.mmPerTile)} × ${Math.round(b.h * state.mmPerTile)} mm`,
     `${state.placements.placeholders.length} placeholder${state.placements.placeholders.length === 1 ? '' : 's'}`,
   ];
+  if (state.options.beltItems === 'auto') {
+    const d = state.detected;
+    chips.push(d?.best ? `items: ${BELT_ITEMS[d.best].label} (from ${d.found[0].source} "${d.found[0].name}")` : 'items: none found in blueprint');
+  } else if (state.options.beltItems !== 'none') {
+    chips.push(`items: ${state.options.beltItems === 'mixed' ? 'mixed' : BELT_ITEMS[state.options.beltItems]?.label}`);
+  }
   if (state.missingKeys.length) chips.push(`${state.missingKeys.length} piece type(s) have no converted model yet`);
   for (const c of chips) {
     const span = document.createElement('span');

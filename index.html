@@ -108,6 +108,21 @@
                   </select>
                 </div>
               </div>
+              <div>
+                <label class="f-label" for="opt-beltItems">Items on belts</label>
+                <select id="opt-beltItems" class="f-select">
+                  <option value="auto">Auto (from the blueprint)</option>
+                  <option value="none">None</option>
+                  <option value="mixed">Mixed (all six)</option>
+                  <option value="gear">Gears</option>
+                  <option value="circuit">Circuits</option>
+                  <option value="cable">Copper cable</option>
+                  <option value="plate">Iron plates</option>
+                  <option value="copper">Copper plates</option>
+                  <option value="steel">Steel plates</option>
+                  <option value="science">Science bottles</option>
+                </select>
+              </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="f-label" for="opt-pad">Border (tiles)</label>
@@ -132,7 +147,7 @@
         </div>
 
         <!-- Centre: 3D view -->
-        <div class="panel flex min-h-[520px] flex-col lg:sticky lg:top-3 lg:h-[calc(100vh-24px)] lg:self-start">
+        <div class="panel flex min-h-[520px] flex-col lg:h-[calc(100vh-24px)] lg:self-start">
           <div class="flex items-center justify-between gap-2">
             <h2 id="view-title" class="mb-0! truncate">3D view</h2>
             <ul class="tabs tabs-for-panel m-0!">

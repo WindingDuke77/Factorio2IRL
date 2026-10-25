@@ -1,6 +1,6 @@
 {
   "mmPerTile": 25,
-  "generated": "2026-10-25T13:19:22.687Z",
+  "generated": "2026-10-25T14:21:42.511Z",
   "pieces": {
     "assembling-machine": {
       "file": "assembling-machine.glb",
@@ -2892,6 +2892,210 @@
         1.9221
       ]
     },
+    "item/circuit": {
+      "file": "item__circuit.glb",
+      "triangles": 5450,
+      "trianglesRaw": 5450,
+      "bboxRaw": {
+        "min": [
+          -4.092,
+          -3.92,
+          0
+        ],
+        "max": [
+          4.092,
+          3.92,
+          1.77
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1637,
+          0,
+          -0.1568
+        ],
+        "max": [
+          0.1637,
+          0.0708,
+          0.1568
+        ]
+      },
+      "size": [
+        0.3273,
+        0.0708,
+        0.3136
+      ]
+    },
+    "item/copper-cable": {
+      "file": "item__copper-cable.glb",
+      "triangles": 7330,
+      "trianglesRaw": 7330,
+      "bboxRaw": {
+        "min": [
+          -4.126,
+          -4.383,
+          0
+        ],
+        "max": [
+          4.64,
+          3.868,
+          0.863
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1753,
+          0,
+          -0.165
+        ],
+        "max": [
+          0.1753,
+          0.0345,
+          0.165
+        ]
+      },
+      "size": [
+        0.3506,
+        0.0345,
+        0.3301
+      ]
+    },
+    "item/gear": {
+      "file": "item__gear.glb",
+      "triangles": 10400,
+      "trianglesRaw": 10400,
+      "bboxRaw": {
+        "min": [
+          -4.543,
+          -4.543,
+          0
+        ],
+        "max": [
+          4.543,
+          4.543,
+          1.957
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1817,
+          0,
+          -0.1817
+        ],
+        "max": [
+          0.1817,
+          0.0783,
+          0.1817
+        ]
+      },
+      "size": [
+        0.3634,
+        0.0783,
+        0.3634
+      ]
+    },
+    "item/iron-or-copper-plate": {
+      "file": "item__iron-or-copper-plate.glb",
+      "triangles": 12,
+      "trianglesRaw": 12,
+      "bboxRaw": {
+        "min": [
+          -4.363,
+          -4.363,
+          0
+        ],
+        "max": [
+          4.363,
+          4.363,
+          0.814
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1745,
+          0,
+          -0.1745
+        ],
+        "max": [
+          0.1745,
+          0.0325,
+          0.1745
+        ]
+      },
+      "size": [
+        0.349,
+        0.0325,
+        0.349
+      ]
+    },
+    "item/science-bottle": {
+      "file": "item__science-bottle.glb",
+      "triangles": 10632,
+      "trianglesRaw": 10632,
+      "bboxRaw": {
+        "min": [
+          106.412,
+          96.05,
+          4.892
+        ],
+        "max": [
+          114.68,
+          104.32,
+          14.672
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1654,
+          0,
+          -0.1654
+        ],
+        "max": [
+          0.1654,
+          0.3912,
+          0.1654
+        ]
+      },
+      "size": [
+        0.3307,
+        0.3912,
+        0.3308
+      ]
+    },
+    "item/steel-plate": {
+      "file": "item__steel-plate.glb",
+      "triangles": 1892,
+      "trianglesRaw": 1892,
+      "bboxRaw": {
+        "min": [
+          -4.981,
+          -4.981,
+          0
+        ],
+        "max": [
+          4.981,
+          4.981,
+          2.465
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1992,
+          0,
+          -0.1992
+        ],
+        "max": [
+          0.1992,
+          0.0986,
+          0.1992
+        ]
+      },
+      "size": [
+        0.3984,
+        0.0986,
+        0.3984
+      ]
+    },
     "small-electric-pole": {
       "file": "small-electric-pole.glb",
       "triangles": 33250,
@@ -4284,6 +4488,386 @@
         1.192,
         1.3243,
         1.192
+      ]
+    },
+    "drill/head": {
+      "file": "drill__head.glb",
+      "triangles": 39986,
+      "trianglesRaw": 134022,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 0
+      },
+      "bboxRaw": {
+        "min": [
+          126.55,
+          118.379,
+          9.188
+        ],
+        "max": [
+          144.668,
+          136.497,
+          18.454
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3624,
+          0,
+          -0.3624
+        ],
+        "max": [
+          0.3624,
+          0.3706,
+          0.3624
+        ]
+      },
+      "size": [
+        0.7247,
+        0.3706,
+        0.7247
+      ]
+    },
+    "drill/frame": {
+      "file": "drill__frame.glb",
+      "triangles": 39996,
+      "trianglesRaw": 105642,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 1
+      },
+      "bboxRaw": {
+        "min": [
+          91.644,
+          71.435,
+          9.224
+        ],
+        "max": [
+          157.996,
+          144.321,
+          26.744
+        ]
+      },
+      "bbox": {
+        "min": [
+          -1.327,
+          0,
+          -1.4577
+        ],
+        "max": [
+          1.327,
+          0.7008,
+          1.4577
+        ]
+      },
+      "size": [
+        2.6541,
+        0.7008,
+        2.9154
+      ]
+    },
+    "drill/leg": {
+      "file": "drill__leg.glb",
+      "triangles": 39996,
+      "trianglesRaw": 73904,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 2
+      },
+      "bboxRaw": {
+        "min": [
+          106.348,
+          147.713,
+          9.224
+        ],
+        "max": [
+          132.012,
+          158.399,
+          17.68
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.5133,
+          0,
+          -0.2137
+        ],
+        "max": [
+          0.5133,
+          0.3382,
+          0.2137
+        ]
+      },
+      "size": [
+        1.0266,
+        0.3382,
+        0.4274
+      ]
+    },
+    "drill/bit": {
+      "file": "drill__bit.glb",
+      "triangles": 40000,
+      "trianglesRaw": 44524,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 4
+      },
+      "bboxRaw": {
+        "min": [
+          107.268,
+          100.575,
+          9.224
+        ],
+        "max": [
+          124.866,
+          118.173,
+          27.636
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.352,
+          0,
+          -0.352
+        ],
+        "max": [
+          0.352,
+          0.7365,
+          0.352
+        ]
+      },
+      "size": [
+        0.7039,
+        0.7365,
+        0.7039
+      ]
+    },
+    "drill/rod": {
+      "file": "drill__rod.glb",
+      "triangles": 12142,
+      "trianglesRaw": 12142,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 5
+      },
+      "bboxRaw": {
+        "min": [
+          160.172,
+          102.661,
+          9.222
+        ],
+        "max": [
+          169.156,
+          111.361,
+          25.81
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1797,
+          0,
+          -0.174
+        ],
+        "max": [
+          0.1797,
+          0.6635,
+          0.174
+        ]
+      },
+      "size": [
+        0.3594,
+        0.6635,
+        0.348
+      ]
+    },
+    "drill/rail": {
+      "file": "drill__rail.glb",
+      "triangles": 8426,
+      "trianglesRaw": 8426,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 6
+      },
+      "bboxRaw": {
+        "min": [
+          154.346,
+          137.399,
+          9.224
+        ],
+        "max": [
+          164.664,
+          156.881,
+          10.62
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.2064,
+          0,
+          -0.3896
+        ],
+        "max": [
+          0.2064,
+          0.0558,
+          0.3896
+        ]
+      },
+      "size": [
+        0.4127,
+        0.0558,
+        0.7793
+      ]
+    },
+    "drill/pipe": {
+      "file": "drill__pipe.glb",
+      "triangles": 5902,
+      "trianglesRaw": 5902,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 10
+      },
+      "bboxRaw": {
+        "min": [
+          78.996,
+          144.415,
+          9.224
+        ],
+        "max": [
+          102.908,
+          150.625,
+          16.252
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.4782,
+          0,
+          -0.1242
+        ],
+        "max": [
+          0.4782,
+          0.2811,
+          0.1242
+        ]
+      },
+      "size": [
+        0.9565,
+        0.2811,
+        0.2484
+      ]
+    },
+    "steel-furnace/body": {
+      "file": "steel-furnace__body.glb",
+      "triangles": 40000,
+      "trianglesRaw": 96552,
+      "part": {
+        "of": "steel-furnace",
+        "rank": 0
+      },
+      "bboxRaw": {
+        "min": [
+          -20.481,
+          -18.993,
+          0
+        ],
+        "max": [
+          19.681,
+          20.161,
+          52.768
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.8032,
+          0,
+          -0.7831
+        ],
+        "max": [
+          0.8032,
+          2.1107,
+          0.7831
+        ]
+      },
+      "size": [
+        1.6065,
+        2.1107,
+        1.5661
+      ]
+    },
+    "pole/base": {
+      "file": "pole__base.glb",
+      "triangles": 11470,
+      "trianglesRaw": 11470,
+      "part": {
+        "of": "small-electric-pole",
+        "rank": 0
+      },
+      "bboxRaw": {
+        "min": [
+          8.658,
+          90.615,
+          23.163
+        ],
+        "max": [
+          23.866,
+          98.197,
+          41.499
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3042,
+          0,
+          -0.1516
+        ],
+        "max": [
+          0.3042,
+          0.7334,
+          0.1516
+        ]
+      },
+      "size": [
+        0.6083,
+        0.7334,
+        0.3033
+      ]
+    },
+    "pole/profile": {
+      "file": "pole__profile.glb",
+      "triangles": 10892,
+      "trianglesRaw": 10892,
+      "part": {
+        "of": "small-electric-pole",
+        "rank": 1
+      },
+      "bboxRaw": {
+        "min": [
+          31.482,
+          47.231,
+          23.163
+        ],
+        "max": [
+          54.77,
+          127.685,
+          25.515
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.4658,
+          0,
+          -1.6091
+        ],
+        "max": [
+          0.4658,
+          0.0941,
+          1.6091
+        ]
+      },
+      "size": [
+        0.9315,
+        0.0941,
+        3.2182
       ]
     }
   }

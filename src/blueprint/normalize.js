@@ -62,15 +62,19 @@ export function flattenBook(decoded, path = '', out = []) {
   } else if (decoded.blueprint_book) {
     const book = decoded.blueprint_book;
     const bookLabel = book.label || 'Book';
-    for (const child of book.blueprints ?? []) {
-      const idx = child.index ?? 0;
+    const children = book.blueprints ?? [];
+    children.forEach((child, pos) => {
+      // Books may also hold deconstruction/upgrade planners; flattenBook ignores those.
+      const idx = child.index ?? pos;
       const childPath = path ? `${path}/${idx}` : `${idx}`;
       const before = out.length;
       flattenBook(child, childPath, out);
       for (let i = before; i < out.length; i++) {
         out[i].label = `${bookLabel} / ${out[i].label}`;
       }
-    }
+      // The book's active entry is the one Factorio shows first.
+      if (!path && idx === (book.active_index ?? 0) && out.length > before) out[before].active = true;
+    });
   }
   return out;
 }

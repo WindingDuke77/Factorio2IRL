@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 
-const GROUP_LABEL = { body: 'Models', hardware: 'Pins', tile: 'Tiles', grid: 'Grid plates' };
+const GROUP_LABEL = { body: 'Models', item: 'Items on belts', hardware: 'Pins & plugs', tile: 'Tiles', grid: 'Grid plates' };
 
 export function renderHeaderStats({ bom, entities }) {
   const el = $('header-stats');

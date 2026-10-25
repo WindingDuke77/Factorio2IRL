@@ -9,12 +9,16 @@
 import { resolveBeltShapes, buildCellMap } from './belts.js';
 import { resolveWallShapes } from './walls.js';
 import { footprintBounds, tilePlates } from './grid.js';
+import { DIR_VEC, rotateDirCW } from './normalize.js';
+import { BELT_ITEMS, ITEM_ORDER } from './items.js';
 
 export const DEFAULT_OPTIONS = Object.freeze({
   endStyle: 'long', // 'long' | 'medium' | 'short' | 'none' — how belt starts/ends are printed
   inserterHand: 'closed', // 'closed' | 'open'
   fillEmpty: true, // put an Empty Tile on every uncovered cell inside the footprint
   includeGrid: true, // add grid base plates + pins
+  beltItems: 'auto', // 'none' | 'auto' | 'mixed' | an id from BELT_ITEMS
+  detectedItem: null, // item id found in the blueprint (used when beltItems === 'auto')
   pad: 0, // extra empty tiles around the footprint
 });
 
@@ -31,6 +35,14 @@ export function buildPlacements(normalized, options = {}) {
   const pieces = [];
   const placeholders = [];
   const covered = new Set();
+  let beltCount = 0;
+  const itemFor = () => {
+    const mode = opt.beltItems;
+    if (!mode || mode === 'none') return null;
+    if (mode === 'auto') return opt.detectedItem ? BELT_ITEMS[opt.detectedItem] ?? null : null;
+    if (mode === 'mixed') return BELT_ITEMS[ITEM_ORDER[beltCount % ITEM_ORDER.length]];
+    return BELT_ITEMS[mode] ?? null;
+  };
 
   const push = (key, e, group, color, extra = {}) => {
     pieces.push({
@@ -55,6 +67,9 @@ export function buildPlacements(normalized, options = {}) {
       case 'belt': {
         const s = beltShapes.get(e.id);
         addBeltPieces(push, e, s, opt);
+        const item = itemFor();
+        if (item) addBeltItems(pieces, e, s, item);
+        beltCount++;
         cover(e);
         break;
       }
@@ -115,6 +130,11 @@ export function buildPlacements(normalized, options = {}) {
     }
   }
 
+  // Wall junctions (corners, T, X) take a Fill-In plug each.
+  let fillIns = 0;
+  for (const s of wallShapes.values()) if (popcount(s.mask) >= 2 && s.mask !== 5 && s.mask !== 10) fillIns++;
+  if (fillIns) pieces.push({ key: 'wall/fill-in', x: bounds.minX, y: bounds.minY, rotation: 0, color: PIN_COLOR, entityId: null, group: 'hardware', qty: fillIns });
+
   // Empty tiles for every uncovered cell inside the footprint.
   if (opt.fillEmpty && bounds.w > 0) {
     for (let x = bounds.minX; x < bounds.maxX; x++) {
@@ -147,6 +167,34 @@ export function buildPlacements(normalized, options = {}) {
   }
 
   return { pieces, placeholders, bounds, grid, options: opt, beltShapes, wallShapes, cellMap: buildCellMap(entities) };
+}
+
+function popcount(n) {
+  let c = 0;
+  while (n) {
+    c += n & 1;
+    n >>= 1;
+  }
+  return c;
+}
+
+/** Two items per lane on straight belts, one per lane on turns (as in Wube's photos). */
+function addBeltItems(pieces, e, s, item) {
+  const fwd = DIR_VEC[e.direction];
+  const right = DIR_VEC[rotateDirCW(e.direction)];
+  const spots = s.shape === 'straight' ? [[-0.24, -0.19], [0.24, -0.19], [-0.24, 0.19], [0.24, 0.19]] : [[0, -0.19], [0, 0.19]];
+  spots.forEach(([a, b], i) => {
+    pieces.push({
+      key: item.key,
+      x: e.x + fwd.x * a + right.x * b,
+      y: e.y + fwd.y * a + right.y * b,
+      rotation: (e.direction + 4 * ((i + e.id) % 4)) % 16,
+      color: item.color,
+      entityId: e.id,
+      entityName: e.name,
+      group: 'item',
+    });
+  });
 }
 
 function addBeltPieces(push, e, s, opt) {

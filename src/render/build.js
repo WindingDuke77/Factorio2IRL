@@ -1,9 +1,10 @@
 // Build a three.js Group from placements: one InstancedMesh per (piece, colour),
-// plus placeholder boxes for entities without an official model.
+// composite pieces assembled from several parts, and placeholder boxes for entities without an
+// official model.
 
 import * as THREE from 'three';
-import { getGeometry, loadManifest } from './models.js';
-import { PIECE_ROTATION, PIECE_TILT, ARM_LEAN, STACK_ON, BODY_INSET, TILE_INSET } from './orientation.js';
+import { getGeometry, loadManifest, ANCHORED } from './models.js';
+import { PIECE_ROTATION, PIECE_TILT, STACK_ON, COMPOSITES, BODY_INSET, TILE_INSET } from './orientation.js';
 
 const DEG = Math.PI / 180;
 
@@ -37,27 +38,37 @@ export function localTransform(key, geo) {
   const box = geo.boundingBox ?? (geo.computeBoundingBox(), geo.boundingBox);
   let tilt = new THREE.Matrix4();
   const offset = new THREE.Vector3();
-
-  const lean = ARM_LEAN[key];
   const fixed = PIECE_TILT[key];
-  if (lean !== undefined) {
-    // Stand the flat arm up (+90° about X puts the south end down) then lean it north.
-    tilt = new THREE.Matrix4().makeRotationX((90 - lean) * DEG);
-    // The mount pin (south end, +Z) must end up at the tile centre.
-    const halfLen = (box.max.z - box.min.z) / 2;
-    offset.z = -halfLen * Math.sin(lean * DEG);
-  } else if (fixed) {
+  if (fixed) {
     tilt = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler((fixed.x ?? 0) * DEG, (fixed.y ?? 0) * DEG, (fixed.z ?? 0) * DEG, 'XYZ'));
   }
-
-  // Lift so the tilted piece rests on y=0, and re-centre it in X/Z unless an anchor was set.
+  if (ANCHORED.has(key)) return { tilt, offset };
   const tilted = box.clone().applyMatrix4(tilt);
-  offset.y = -tilted.min.y;
-  if (lean === undefined) {
-    offset.x = -(tilted.min.x + tilted.max.x) / 2;
-    offset.z += -(tilted.min.z + tilted.max.z) / 2;
-  }
+  offset.set(-(tilted.min.x + tilted.max.x) / 2, -tilted.min.y, -(tilted.min.z + tilted.max.z) / 2);
   return { tilt, offset };
+}
+
+/** Local matrix for a composite part: either pos/rot, or aligned along a from→to line. */
+function partMatrix(part, geo) {
+  const m = new THREE.Matrix4();
+  if (part.from) {
+    const from = new THREE.Vector3(...part.from);
+    const to = new THREE.Vector3(...part.to);
+    const dir = to.clone().sub(from).normalize();
+    const centre = from.clone().lerp(to, part.t ?? 0.5);
+    // Align the part's longest axis with the line.
+    const b = geo.boundingBox;
+    const sz = new THREE.Vector3().subVectors(b.max, b.min);
+    const axis = sz.x >= sz.y && sz.x >= sz.z ? new THREE.Vector3(1, 0, 0) : sz.z >= sz.y ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0);
+    const q = new THREE.Quaternion().setFromUnitVectors(axis, dir);
+    // The part is centred on its bbox in XZ with min y = 0: shift it to its own centre first.
+    const shift = new THREE.Matrix4().makeTranslation(0, -(b.max.y + b.min.y) / 2, 0);
+    return m.compose(centre, q, new THREE.Vector3(1, 1, 1)).multiply(shift);
+  }
+  const pos = new THREE.Vector3(...(part.pos ?? [0, 0, 0]));
+  const rot = part.rot ?? [0, 0, 0];
+  const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(rot[0] * DEG, rot[1] * DEG, rot[2] * DEG, 'XYZ'));
+  return m.compose(pos, q, new THREE.Vector3(1, 1, 1));
 }
 
 /**
@@ -76,12 +87,17 @@ export async function buildBlueprintGroup(placements, view = {}) {
   const heightOf = (key) => manifest.pieces?.[key]?.size?.[1] ?? 0;
   const plateH = Math.max(0, heightOf('grid/1x1') - TILE_INSET);
   const tileH = Math.max(0, heightOf('tile/empty') - BODY_INSET);
+  const stackBase = (key, depth = 0) => {
+    const s = STACK_ON[key];
+    if (!s || depth > 4) return 0;
+    return stackBase(s.on, depth + 1) + Math.max(0, heightOf(s.on) - (s.inset ?? 0));
+  };
 
   // Group instances by (key, color).
   const buckets = new Map();
   for (const p of placements.pieces) {
     if (p.group === 'hardware') continue;
-    if (p.group === 'body' && !show.showBodies) continue;
+    if ((p.group === 'body' || p.group === 'item') && !show.showBodies) continue;
     if (p.group === 'tile' && !show.showTiles) continue;
     if (p.group === 'grid' && !show.showGrid) continue;
     const k = `${p.key}|${p.color}`;
@@ -92,41 +108,52 @@ export async function buildBlueprintGroup(placements, view = {}) {
   const missing = new Set();
   const mWorld = new THREE.Matrix4();
   const mYaw = new THREE.Matrix4();
-  const mOffset = new THREE.Matrix4();
+
+  const baseYFor = (b) => {
+    if (b.group === 'tile') return show.showGrid ? plateH : 0;
+    if (b.group === 'body' || b.group === 'item') return (show.showGrid ? plateH : 0) + (show.showTiles ? tileH : 0) + stackBase(b.key);
+    return 0;
+  };
+
+  const addInstances = (b, geo, local, baseY, rotOffset) => {
+    const mesh = new THREE.InstancedMesh(geo, materialFor(b.color, b.group === 'grid' ? { roughness: 0.95, metalness: 0 } : {}), b.items.length);
+    mesh.castShadow = b.group !== 'grid';
+    mesh.receiveShadow = true;
+    b.items.forEach((p, i) => {
+      const yaw = -((p.rotation + rotOffset) / 16) * Math.PI * 2;
+      mWorld.makeTranslation(p.x - cx, baseY, p.y - cy);
+      mYaw.makeRotationY(yaw);
+      mesh.setMatrixAt(i, new THREE.Matrix4().multiplyMatrices(mWorld, mYaw).multiply(local));
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.userData = { key: b.key, group: b.group };
+    group.add(mesh);
+  };
 
   await Promise.all(
     [...buckets.values()].map(async (b) => {
+      const baseY = baseYFor(b);
+      const rotOffset = PIECE_ROTATION[b.key] ?? 0;
+      const composite = COMPOSITES[b.key];
+      if (composite) {
+        let any = false;
+        for (const part of composite) {
+          const geo = await getGeometry(part.key);
+          if (!geo) continue;
+          any = true;
+          addInstances(b, geo, partMatrix(part, geo), baseY, rotOffset);
+        }
+        if (!any) missing.add(b.key);
+        return;
+      }
       const geo = await getGeometry(b.key);
       if (!geo) {
         missing.add(b.key);
         return;
       }
-      const mesh = new THREE.InstancedMesh(geo, materialFor(b.color, b.group === 'grid' ? { roughness: 0.95, metalness: 0 } : {}), b.items.length);
-      mesh.castShadow = b.group !== 'grid';
-      mesh.receiveShadow = true;
-
-      let baseY = 0;
-      if (b.group === 'tile') baseY = show.showGrid ? plateH : 0;
-      else if (b.group === 'body') {
-        baseY = (show.showGrid ? plateH : 0) + (show.showTiles ? tileH : 0);
-        const under = STACK_ON[b.key];
-        if (under) baseY += Math.max(0, heightOf(under.on) - (under.inset ?? 0));
-      }
-      const rotOffset = PIECE_ROTATION[b.key] ?? 0;
       const { tilt, offset } = localTransform(b.key, geo);
-      mOffset.makeTranslation(offset.x, offset.y, offset.z);
-      const local = new THREE.Matrix4().multiplyMatrices(mOffset, tilt);
-
-      b.items.forEach((p, i) => {
-        const yaw = -((p.rotation + rotOffset) / 16) * Math.PI * 2;
-        mWorld.makeTranslation(p.x - cx, baseY, p.y - cy);
-        mYaw.makeRotationY(yaw);
-        const m = new THREE.Matrix4().multiplyMatrices(mWorld, mYaw).multiply(local);
-        mesh.setMatrixAt(i, m);
-      });
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.userData = { key: b.key, group: b.group };
-      group.add(mesh);
+      const local = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z).multiply(tilt);
+      addInstances(b, geo, local, baseY, rotOffset);
     }),
   );
 

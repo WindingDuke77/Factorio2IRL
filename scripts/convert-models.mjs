@@ -124,6 +124,51 @@ function normalise(pos, rawBox, mmPerTile) {
   return bbox(pos);
 }
 
+// ---------------------------------------------------------------- print-plate splitting
+//
+// Some STLs are print plates holding several loose parts (the drill's frame, legs, bit...; the steel
+// furnace body plus its pipes; the pole's base and two flat profiles). We split them into connected
+// components (ranked by triangle count, largest first) and write the useful ones as their own pieces
+// so the renderer can assemble them. Ranks were checked against the raw files; see README.
+const SPLIT_PARTS = {
+  'electric-mining-drill': { 'drill/head': 0, 'drill/frame': 1, 'drill/leg': 2, 'drill/bit': 4, 'drill/rod': 5, 'drill/rail': 6, 'drill/pipe': 10 },
+  'steel-furnace': { 'steel-furnace/body': 0 },
+  'small-electric-pole': { 'pole/base': 0, 'pole/profile': 1 },
+};
+
+/** Connected components of a triangle soup (vertices welded at 0.01 mm). Sorted largest first. */
+function splitComponents(pos) {
+  const n = pos.length / 9;
+  const key = new Map();
+  const vid = new Int32Array(n * 3);
+  let nv = 0;
+  for (let i = 0; i < n * 3; i++) {
+    const k = `${Math.round(pos[i * 3] * 100)},${Math.round(pos[i * 3 + 1] * 100)},${Math.round(pos[i * 3 + 2] * 100)}`;
+    let id = key.get(k);
+    if (id === undefined) { id = nv++; key.set(k, id); }
+    vid[i] = id;
+  }
+  const parent = new Int32Array(nv);
+  for (let i = 0; i < nv; i++) parent[i] = i;
+  const find = (a) => { while (parent[a] !== a) { parent[a] = parent[parent[a]]; a = parent[a]; } return a; };
+  for (let t = 0; t < n; t++) {
+    const a = find(vid[t * 3]), b = find(vid[t * 3 + 1]), c = find(vid[t * 3 + 2]);
+    parent[a] = b; parent[find(b)] = find(c);
+  }
+  const groups = new Map();
+  for (let t = 0; t < n; t++) {
+    const r0 = find(vid[t * 3]);
+    let g = groups.get(r0);
+    if (!g) { g = []; groups.set(r0, g); }
+    g.push(t);
+  }
+  return [...groups.values()].sort((a, b) => b.length - a.length).map((tris) => {
+    const out = new Float32Array(tris.length * 9);
+    tris.forEach((t, i) => out.set(pos.subarray(t * 9, t * 9 + 9), i * 9));
+    return out;
+  });
+}
+
 // ---------------------------------------------------------------- glTF building
 
 async function makeIO() {
@@ -298,6 +343,45 @@ async function main() {
       failures.push(`${e.key}: ${err.message}`);
       console.error(`  FAILED ${e.key}: ${err.message}`);
     }
+  }
+
+  // --- Phase 3: split print plates into parts.
+  console.log('\n== Splitting print plates ==');
+  for (const [srcKey, parts] of Object.entries(SPLIT_PARTS)) {
+    const e = pieces.find((p) => p.key === srcKey);
+    if (!e) continue;
+    const src = rawPath(e);
+    const srcT = await mtime(src);
+    const partKeys = Object.keys(parts);
+    const fresh = await Promise.all(partKeys.map(async (k) => {
+      const t = await mtime(path.join(OUT_DIR, k.replaceAll('/', '__') + '.glb'));
+      return t != null && t > srcT && reusable[k];
+    }));
+    if (!FORCE && fresh.every(Boolean)) {
+      for (const k of partKeys) { manifest.pieces[k] = reusable[k]; stats.skipped++; }
+      continue;
+    }
+    try {
+      const pos = parseStl(await fs.readFile(src));
+      const comps = splitComponents(pos);
+      console.log(`  ${srcKey}: ${comps.length} components`);
+      for (const [partKey, rank] of Object.entries(parts)) {
+        const part = comps[rank];
+        if (!part) { failures.push(`${partKey}: component rank ${rank} missing`); stats.failed++; continue; }
+        const file = partKey.replaceAll('/', '__') + '.glb';
+        const trianglesRaw = part.length / 9;
+        const bboxRaw = bbox(part);
+        const box = normalise(part, bboxRaw, mmPerTile);
+        const res = await writeGlb(io, partKey, part, path.join(OUT_DIR, file));
+        manifest.pieces[partKey] = {
+          file, triangles: res.triangles, trianglesRaw, part: { of: srcKey, rank },
+          bboxRaw: { min: rv(bboxRaw.min), max: rv(bboxRaw.max) },
+          bbox: { min: rv(box.min, 4), max: rv(box.max, 4) }, size: rv(size(box), 4),
+        };
+        stats.written++; stats.bytes += res.bytes;
+        console.log(`    ${partKey.padEnd(26)} rank ${rank}  ${String(trianglesRaw).padStart(7)} -> ${String(res.triangles).padStart(6)} tris  size ${rv(size(box), 2).join('x')}`);
+      }
+    } catch (err) { stats.failed++; failures.push(`${srcKey} split: ${err.message}`); }
   }
 
   await fs.writeFile(MANIFEST, JSON.stringify(manifest, null, 2) + '\n');

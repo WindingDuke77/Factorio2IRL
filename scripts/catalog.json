@@ -884,58 +884,6 @@
     "render": false
   },
   {
-    "key": "decor/circuit",
-    "set": "1807994",
-    "setName": "Factorio Belt Items",
-    "slug": "factorio-belt-items",
-    "license": "CC BY-NC",
-    "fileId": "7552868",
-    "filename": "Circuit.stl",
-    "folder": "",
-    "variant": null,
-    "fileSize": 272584,
-    "render": false
-  },
-  {
-    "key": "decor/copper-cable",
-    "set": "1807994",
-    "setName": "Factorio Belt Items",
-    "slug": "factorio-belt-items",
-    "license": "CC BY-NC",
-    "fileId": "7552873",
-    "filename": "Copper Cable.stl",
-    "folder": "",
-    "variant": null,
-    "fileSize": 366584,
-    "render": false
-  },
-  {
-    "key": "decor/gear",
-    "set": "1807994",
-    "setName": "Factorio Belt Items",
-    "slug": "factorio-belt-items",
-    "license": "CC BY-NC",
-    "fileId": "7552874",
-    "filename": "Gear.stl",
-    "folder": "",
-    "variant": null,
-    "fileSize": 520084,
-    "render": false
-  },
-  {
-    "key": "decor/iron-or-copper-plate",
-    "set": "1807994",
-    "setName": "Factorio Belt Items",
-    "slug": "factorio-belt-items",
-    "license": "CC BY-NC",
-    "fileId": "7552875",
-    "filename": "Iron or Copper Plate.stl",
-    "folder": "",
-    "variant": null,
-    "fileSize": 684,
-    "render": false
-  },
-  {
     "key": "decor/player-dead",
     "set": "1801957",
     "setName": "Factorio Player Character",
@@ -1105,19 +1053,6 @@
     "render": false
   },
   {
-    "key": "decor/science-bottle",
-    "set": "1807994",
-    "setName": "Factorio Belt Items",
-    "slug": "factorio-belt-items",
-    "license": "CC BY-NC",
-    "fileId": "7552876",
-    "filename": "Science Bottle.stl",
-    "folder": "",
-    "variant": null,
-    "fileSize": 531684,
-    "render": false
-  },
-  {
     "key": "decor/spitter-attack-body",
     "set": "1801972",
     "setName": "Factorio Spitter",
@@ -1193,19 +1128,6 @@
     "folder": "",
     "variant": null,
     "fileSize": 3895384,
-    "render": false
-  },
-  {
-    "key": "decor/steel-plate",
-    "set": "1807994",
-    "setName": "Factorio Belt Items",
-    "slug": "factorio-belt-items",
-    "license": "CC BY-NC",
-    "fileId": "7552877",
-    "filename": "Steel Plate.stl",
-    "folder": "",
-    "variant": null,
-    "fileSize": 94684,
     "render": false
   },
   {
@@ -2181,6 +2103,84 @@
     "folder": "Inserters High Precision",
     "variant": "precision",
     "fileSize": 492184,
+    "render": true
+  },
+  {
+    "key": "item/circuit",
+    "set": "1807994",
+    "setName": "Factorio Belt Items",
+    "slug": "factorio-belt-items",
+    "license": "CC BY-NC",
+    "fileId": "7552868",
+    "filename": "Circuit.stl",
+    "folder": "",
+    "variant": null,
+    "fileSize": 272584,
+    "render": true
+  },
+  {
+    "key": "item/copper-cable",
+    "set": "1807994",
+    "setName": "Factorio Belt Items",
+    "slug": "factorio-belt-items",
+    "license": "CC BY-NC",
+    "fileId": "7552873",
+    "filename": "Copper Cable.stl",
+    "folder": "",
+    "variant": null,
+    "fileSize": 366584,
+    "render": true
+  },
+  {
+    "key": "item/gear",
+    "set": "1807994",
+    "setName": "Factorio Belt Items",
+    "slug": "factorio-belt-items",
+    "license": "CC BY-NC",
+    "fileId": "7552874",
+    "filename": "Gear.stl",
+    "folder": "",
+    "variant": null,
+    "fileSize": 520084,
+    "render": true
+  },
+  {
+    "key": "item/iron-or-copper-plate",
+    "set": "1807994",
+    "setName": "Factorio Belt Items",
+    "slug": "factorio-belt-items",
+    "license": "CC BY-NC",
+    "fileId": "7552875",
+    "filename": "Iron or Copper Plate.stl",
+    "folder": "",
+    "variant": null,
+    "fileSize": 684,
+    "render": true
+  },
+  {
+    "key": "item/science-bottle",
+    "set": "1807994",
+    "setName": "Factorio Belt Items",
+    "slug": "factorio-belt-items",
+    "license": "CC BY-NC",
+    "fileId": "7552876",
+    "filename": "Science Bottle.stl",
+    "folder": "",
+    "variant": null,
+    "fileSize": 531684,
+    "render": true
+  },
+  {
+    "key": "item/steel-plate",
+    "set": "1807994",
+    "setName": "Factorio Belt Items",
+    "slug": "factorio-belt-items",
+    "license": "CC BY-NC",
+    "fileId": "7552877",
+    "filename": "Steel Plate.stl",
+    "folder": "",
+    "variant": null,
+    "fileSize": 94684,
     "render": true
   },
   {

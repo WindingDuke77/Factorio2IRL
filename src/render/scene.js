@@ -81,8 +81,10 @@ export function createScene(canvas) {
   function frame(bounds, view = 'iso') {
     const w = Math.max(bounds?.w ?? 6, 1);
     const h = Math.max(bounds?.h ?? 6, 1);
-    const radius = Math.max(w, h) * 0.62 + 2;
-    const dist = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const radius = Math.max(w, h) * 0.58 + 1.5;
+    const vFov = THREE.MathUtils.degToRad(camera.fov / 2);
+    const hFov = Math.atan(Math.tan(vFov) * Math.max(camera.aspect, 0.2));
+    const dist = Math.max(radius / Math.tan(vFov), radius / Math.tan(hFov));
     controls.target.set(0, 0.4, 0);
     if (view === 'top') {
       // Straight down with north (−Z) at the top of the screen.

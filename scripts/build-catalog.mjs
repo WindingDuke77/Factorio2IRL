@@ -48,6 +48,7 @@ export function mapKey(setId, folder, filename) {
   const variant = variantOf(folder, filename);
   const renderVariant = variant !== 'clearance'; // precision or variant-less
 
+  if (setId === '1807994') return { key: `item/${slug}`, render: true }; // Belt Items: placed on belts
   if (DECOR_SETS.has(setId)) return { key: `decor/${slug}`, render: false };
 
   switch (setId) {

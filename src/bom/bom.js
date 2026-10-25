@@ -78,6 +78,7 @@ export function buildBom(placements, opts = {}) {
   const totals = {
     pieces: [...counts.values()].reduce((a, b) => a + b, 0),
     bodies: sum(placements.pieces, (p) => p.group === 'body'),
+    items: sum(placements.pieces, (p) => p.group === 'item'),
     tiles: sum(placements.pieces, (p) => p.group === 'tile'),
     plates: sum(placements.pieces, (p) => p.group === 'grid'),
     pins: placements.grid?.pins ?? 0,
@@ -100,11 +101,12 @@ function sum(arr, pred) {
 function groupOf(key) {
   if (key.startsWith('grid/')) return 'grid';
   if (key.startsWith('tile/')) return 'tile';
+  if (key.startsWith('item/')) return 'item';
   if (key.endsWith('-pin')) return 'hardware';
   return 'body';
 }
 function groupRank(g) {
-  return { body: 0, hardware: 1, tile: 2, grid: 3 }[g] ?? 9;
+  return { body: 0, item: 1, hardware: 2, tile: 3, grid: 4 }[g] ?? 9;
 }
 
 /** Plain-text export of the parts list. */

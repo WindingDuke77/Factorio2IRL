@@ -1,7 +1,6 @@
-// Per-piece orientation and stacking corrections, tuned against the converted Wube models
-// (see the ?gallery view). The converted GLBs are centred on their own bounding box with the
-// base at y=0; these tables say which way each model faces in its own frame and how pieces
-// stack. Entity direction 0 = north = −Z in the scene.
+// Per-piece orientation, stacking and assembly rules, tuned against the converted Wube models
+// and Wube's own product photos / assembly guides (see README). The converted GLBs are centred
+// on their own bounding box with the base at y=0. Entity direction 0 = north = −Z in the scene.
 //
 // Findings from the STL inspection (scripts/catalog.json keys):
 //   * Belt tops/bottoms flow along +X ("east"); start caps are at the west end, end caps east.
@@ -9,7 +8,9 @@
 //     west and exits north; "Turn R" enters from the north and exits west.
 //   * Underground hoods are modelled standing on their mouth (nose up) for printing; the
 //     "In" base flows west into the hood, the "Out" base flows east out of it.
-//   * Inserter arms are flat side profiles with the mount pin at the south end.
+//   * Inserter arms are flat side profiles folded at two hex hinges (done in models.js).
+//   * The drill, steel furnace and small pole STLs are print plates of loose parts; the converter
+//     splits them into components which COMPOSITES below assemble.
 //   * Walls: "Ending N" has its rounded free end facing north; corners/T-junctions are named
 //     by the sides they connect to.
 
@@ -46,7 +47,7 @@ export const PIECE_ROTATION = {
   'tile/end-long': 12,
   'tile/end-medium': 12,
   'tile/end-short': 12,
-  // Inserters: the entity direction is the pickup side; the arm reaches towards the drop side.
+  // Inserters: the entity direction is the pickup side; the folded arm reaches towards −Z.
   'inserter/basic-closed': 8,
   'inserter/basic-open': 8,
   'inserter/long-closed': 8,
@@ -69,22 +70,8 @@ export const PIECE_TILT = {
 };
 
 /**
- * Inserter arms: stood up from their flat print pose and leaned over towards the drop side
- * (degrees from vertical). The mount pin ends up at the tile centre.
- */
-export const ARM_LEAN = {
-  'inserter/basic-closed': 38,
-  'inserter/basic-open': 38,
-  'inserter/long-closed': 48,
-  'inserter/long-open': 48,
-  'inserter/bulk-closed': 38,
-  'inserter/bulk-open': 38,
-  'inserter/stack-closed': 38,
-  'inserter/stack-open': 38,
-};
-
-/**
  * Vertical stacking: which piece a piece sits on, and how far it sinks into it (tiles).
+ * Chains are followed (items sit on belt tops, which sit on belt bottoms).
  */
 export const STACK_ON = {
   'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.12 },
@@ -97,14 +84,45 @@ export const STACK_ON = {
   'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.12 },
   'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.12 },
   'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.12 },
-  'inserter/basic-closed': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/basic-open': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/long-closed': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/long-open': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/bulk-closed': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/bulk-open': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/stack-closed': { on: 'inserter/base-single', inset: 0.14 },
-  'inserter/stack-open': { on: 'inserter/base-single', inset: 0.14 },
+  'inserter/basic-closed': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/basic-open': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/long-closed': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/long-open': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/bulk-closed': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/bulk-open': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/stack-closed': { on: 'inserter/base-single', inset: 0.1 },
+  'inserter/stack-open': { on: 'inserter/base-single', inset: 0.1 },
+  'item/gear': { on: 'belt/straight-top', inset: 0.01 },
+  'item/circuit': { on: 'belt/straight-top', inset: 0.01 },
+  'item/copper-cable': { on: 'belt/straight-top', inset: 0.01 },
+  'item/iron-or-copper-plate': { on: 'belt/straight-top', inset: 0.01 },
+  'item/steel-plate': { on: 'belt/straight-top', inset: 0.01 },
+  'item/science-bottle': { on: 'belt/straight-top', inset: 0.01 },
+};
+
+/**
+ * Pieces assembled from several converted parts (print plates split by the converter).
+ * Each part: { key, pos:[x,y,z], rot:[degX,degY,degZ] } in the entity's frame (tile centre, y=0 on
+ * the tile), or { key, from, to, t } to align the part's long X axis from `from` to `to`, centred
+ * at fraction `t` along that line.
+ */
+export const COMPOSITES = {
+  'steel-furnace': [{ key: 'steel-furnace/body', pos: [0, 0, 0] }],
+  'small-electric-pole': [
+    { key: 'pole/base', pos: [0, 0, 0] },
+    { key: 'pole/profile', pos: [0, 0.62, 0], rot: [0, 0, 0] },
+    { key: 'pole/profile', pos: [0, 0.62, 0], rot: [0, 90, 0] },
+  ],
+  'electric-mining-drill': [
+    { key: 'drill/frame', pos: [0, 0, 0] },
+    { key: 'drill/bit', pos: [0, 0.1, 0] },
+    { key: 'drill/rod', pos: [0, 0.8, 0] },
+    { key: 'drill/head', pos: [0, 1.42, 0] },
+    { key: 'drill/leg', from: [-0.3, 1.55, -0.15], to: [-1.2, 0.3, -1.2], t: 0.3 },
+    { key: 'drill/leg', from: [0.3, 1.55, -0.15], to: [1.2, 0.3, -1.2], t: 0.3 },
+    { key: 'drill/rail', from: [-0.3, 1.55, -0.15], to: [-1.2, 0.3, -1.2], t: 0.78 },
+    { key: 'drill/rail', from: [0.3, 1.55, -0.15], to: [1.2, 0.3, -1.2], t: 0.78 },
+  ],
 };
 
 /** How far (in tiles) a body sinks into its tile's pocket. */
