@@ -106,6 +106,14 @@ export function buildPlacements(normalized, options = {}) {
         break;
       }
       case 'splitter': {
+        // Per Wube's guide a splitter sits over two Straight Bottoms (one per lane); the splitter
+        // base is a cover that goes over them and carries the top.
+        {
+          const right = DIR_VEC[rotateDirCW(e.direction)];
+          for (const side of [-0.5, 0.5]) {
+            push('belt/straight-bottom', e, 'body', d.baseColor, { x: e.x + right.x * side, y: e.y + right.y * side });
+          }
+        }
         push('belt/splitter-top', e, 'body', d.color);
         push('belt/splitter-bottom', e, 'body', d.baseColor);
         push('belt/splitter-pin', e, 'hardware', PIN_COLOR, { qty: 2 });

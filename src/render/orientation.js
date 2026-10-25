@@ -90,17 +90,17 @@ export const PIECE_OFFSET = {
 export const STACK_ON = {
   // The chevron plate (2.76 mm) rests on the base's 4.75 mm support plateau: its surface ends
   // at 7.5 mm, so the 7 mm plus pegs slot into it and the 6 mm side rails stay below it.
-  'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.09 },
-  'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.09 },
-  'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.09 },
+  'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.07 },
+  'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.07 },
+  'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.07 },
   // Hood feet drop ~2.5 mm into the notches on the base's side rails (rail top at 5.1 mm).
   'belt/underground-in-top': { on: 'belt/underground-in-bottom', inset: 0.25 },
   'belt/underground-out-top': { on: 'belt/underground-out-bottom', inset: 0.25 },
   'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.0 },
   'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.12 },
-  'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.09 },
+  'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.07 },
   'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.125 },
-  'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.09 },
+  'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.07 },
   'inserter/basic-closed': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/basic-open': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/long-closed': { on: 'inserter/base-single', inset: 0.1 },
