@@ -77,7 +77,7 @@ function partMatrix(part, geo) {
  * @returns {Promise<{ group: THREE.Group, missingKeys: string[] }>}
  */
 export async function buildBlueprintGroup(placements, view = {}) {
-  const show = { showBodies: true, showTiles: false, showGrid: true, ...view };
+  const show = { showBodies: true, showTiles: false, showGrid: true, showMissing: false, ...view };
   const manifest = await loadManifest();
   const group = new THREE.Group();
   const { bounds } = placements;
@@ -157,9 +157,9 @@ export async function buildBlueprintGroup(placements, view = {}) {
     }),
   );
 
-  // Placeholders: boxes with orange edges and a floating label.
+  // Placeholders: boxes with orange edges and a floating label (off by default).
   const phBase = show.showGrid ? plateH : 0;
-  for (const ph of placements.placeholders) {
+  for (const ph of show.showMissing ? placements.placeholders : []) {
     const h = 0.6;
     const box = new THREE.Mesh(new THREE.BoxGeometry(ph.w - 0.08, h, ph.h - 0.08), placeholderMat);
     box.position.set(ph.x - cx, phBase + h / 2, ph.y - cy);

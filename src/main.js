@@ -23,7 +23,7 @@ const state = {
   group: null,
   options: { ...DEFAULT_OPTIONS },
   variant: 'precision',
-  view: { showBodies: true, showTiles: false, showGrid: true }, // tiles are printed but not drawn: models sit on the plates
+  view: { showBodies: true, showTiles: false, showGrid: true, showMissing: false }, // tiles are printed but not drawn: models sit on the plates
   mmPerTile: 25,
   missingKeys: [],
   buildToken: 0,
@@ -107,6 +107,7 @@ async function init() {
 
   bindView('view-bodies', 'showBodies');
   bindView('view-grid', 'showGrid');
+  bindView('view-missing', 'showMissing');
 
   for (const view of ['iso', 'top', 'front']) {
     $(`btn-view-${view}`).addEventListener('click', (e) => {
@@ -136,9 +137,12 @@ async function init() {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
 
-  // Deep links: ?sample=<id>
+  // Deep links: ?sample=<id>, ?dev
   const params = new URLSearchParams(location.search);
-  if (params.get('sample')) {
+  if (params.has('dev')) {
+    const { installDevCycler } = await import('./dev/cycler.js');
+    installDevCycler({ onLoad: (json) => renderFromText(JSON.stringify(json)) });
+  } else if (params.get('sample')) {
     sel.value = params.get('sample');
     loadSample(params.get('sample'));
   }
