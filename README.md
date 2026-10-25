@@ -70,7 +70,10 @@ npm run models        # = fetch-models + convert-models
 - Wall corners, T- and X-junctions each take one "Walls Fill-In" plug.
 - Stacking heights come from the STLs: the grid plate is a 2 mm slab with a 1.5 mm rim, tiles
   (2 mm) drop into that pocket, shaped tiles have a 1 mm pocket the model base sits in, and the
-  belt top rests on a ledge 3.25 mm up inside its base.
+  belt top rests on the 4.75 mm plateau inside its base, so the plus pegs slot into the plate.
+- Belt ends are optional (default none): "short" puts the rounded cap on the free tile before/after
+  the belt (with its End Short Tile), "long" uses the integrated end piece, "medium" uses the
+  medium piece plus the cap within the belt's tile.
 - Chests can be drawn closed (one piece) or open (body + lid propped at the back hinge); logistic
   chests always carry their separate lid plate. Both are counted in the parts list.
 - `src/render/orientation.js` documents how each model is oriented in its own file (belts flow

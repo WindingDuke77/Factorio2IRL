@@ -13,7 +13,7 @@ import { DIR_VEC, rotateDirCW } from './normalize.js';
 import { BELT_ITEMS, ITEM_ORDER } from './items.js';
 
 export const DEFAULT_OPTIONS = Object.freeze({
-  endStyle: 'long', // 'long' | 'medium' | 'short' | 'none' — how belt starts/ends are printed
+  endStyle: 'none', // 'none' | 'short' (cap on the next tile) | 'long' (integrated piece) | 'medium' (medium piece + cap)
   inserterHand: 'closed', // 'closed' | 'open'
   fillEmpty: true, // put an Empty Tile on every uncovered cell inside the footprint
   includeGrid: true, // add grid base plates + pins
@@ -31,7 +31,27 @@ export function buildPlacements(normalized, options = {}) {
   const { entities, tiles } = normalized;
   const beltShapes = resolveBeltShapes(entities);
   const wallShapes = resolveWallShapes(entities);
-  const bounds = footprintBounds(entities, tiles, opt.pad);
+  // Short end caps sit on the tile before/after the belt, so reserve those cells when free.
+  const cellMap = buildCellMap(entities);
+  const capCells = [];
+  const capsAllowed = new Set();
+  if (opt.endStyle === 'short') {
+    for (const e of entities) {
+      if (e.def.kind !== 'belt') continue;
+      const s = beltShapes.get(e.id);
+      if (s.shape !== 'straight') continue;
+      const f = DIR_VEC[e.direction];
+      for (const [flag, sign, cap] of [[s.isStart, -1, 'start'], [s.isEnd, 1, 'end']]) {
+        if (!flag) continue;
+        const cx = e.left + f.x * sign;
+        const cy = e.top + f.y * sign;
+        if (cellMap.has(`${cx},${cy}`) || capCells.some((c) => c.x === cx && c.y === cy)) continue;
+        capCells.push({ x: cx, y: cy });
+        capsAllowed.add(`${e.id}:${cap}`);
+      }
+    }
+  }
+  const bounds = footprintBounds(entities, [...tiles, ...capCells], opt.pad);
 
   const pieces = [];
   const placeholders = [];
@@ -61,13 +81,14 @@ export function buildPlacements(normalized, options = {}) {
   const cover = (e) => {
     for (let dx = 0; dx < e.w; dx++) for (let dy = 0; dy < e.h; dy++) covered.add(`${e.left + dx},${e.top + dy}`);
   };
+  for (const c of capCells) covered.add(`${c.x},${c.y}`);
 
   for (const e of entities) {
     const d = e.def;
     switch (d.kind) {
       case 'belt': {
         const s = beltShapes.get(e.id);
-        addBeltPieces(push, e, s, opt);
+        addBeltPieces(push, e, s, opt, capsAllowed);
         const item = itemFor();
         if (item && s.shape === 'straight') addBeltItems(pieces, e, s, item);
         beltCount++;
@@ -206,7 +227,7 @@ function addBeltItems(pieces, e, s, item) {
   });
 }
 
-function addBeltPieces(push, e, s, opt) {
+function addBeltPieces(push, e, s, opt, capsAllowed = new Set()) {
   const d = e.def;
   if (s.shape === 'turn-l' || s.shape === 'turn-r') {
     // The turn base and tile are symmetric quarter-circles (pivot NW when unrotated); a right
@@ -218,29 +239,38 @@ function addBeltPieces(push, e, s, opt) {
     return;
   }
   const style = opt.endStyle;
+  const f = DIR_VEC[e.direction];
+  const at = (dist) => ({ x: e.x + f.x * dist, y: e.y + f.y * dist });
+  // A lone belt tile counts as a start. The end tiles are modelled for an "End" (rounded at the
+  // front); a start is the mirror image.
   const cap = s.isStart ? 'start' : s.isEnd ? 'end' : null;
-  // The end tiles are modelled for an "End" piece (rounded at the front); a start is the mirror.
+  const sign = cap === 'end' ? 1 : -1;
   const capRot = (e.direction + (cap === 'start' ? 8 : 0)) % 16;
+
   if (cap && style === 'long') {
+    // One integrated piece: a full tile with the rounded end built in.
     push(`belt/${cap}-long-top`, e, 'body', d.color);
     push(`belt/${cap}-long-bottom`, e, 'body', d.baseColor);
     push('tile/end-long', e, 'tile', d.tileColor, { rotation: capRot });
-  } else if (cap && style === 'medium') {
-    push(`belt/${cap}-medium-top`, e, 'body', d.color);
-    push(`belt/${cap}-medium-bottom`, e, 'body', d.baseColor);
-    push('tile/end-medium', e, 'tile', d.tileColor, { rotation: capRot });
-  } else {
-    push('belt/straight-top', e, 'body', d.color);
-    push('belt/straight-bottom', e, 'body', d.baseColor);
-    push('tile/straight', e, 'tile', d.tileColor);
-    if (cap && style === 'short') {
-      push(`belt/${cap}-short`, e, 'body', d.baseColor, { cap: true, rotation: capRot });
-      push('tile/end-short', e, 'tile', d.tileColor, { cap: true, rotation: capRot });
-    }
+    return;
   }
-  // A lone belt that both starts and ends gets a short end cap on top of its start piece.
-  if (s.isStart && s.isEnd && style !== 'none' && style !== 'short') {
-    push('belt/end-short', e, 'body', d.baseColor, { cap: true });
-    push('tile/end-short', e, 'tile', d.tileColor, { cap: true });
+  if (cap && style === 'medium') {
+    // Medium piece (0.76) + short cap (0.27) share the tile.
+    push(`belt/${cap}-medium-top`, e, 'body', d.color, at(-sign * 0.12));
+    push(`belt/${cap}-medium-bottom`, e, 'body', d.baseColor, at(-sign * 0.12));
+    push(`belt/${cap}-short`, e, 'body', d.baseColor, at(sign * 0.365));
+    push('tile/end-medium', e, 'tile', d.tileColor, { rotation: capRot });
+    return;
+  }
+  push('belt/straight-top', e, 'body', d.color);
+  push('belt/straight-bottom', e, 'body', d.baseColor);
+  push('tile/straight', e, 'tile', d.tileColor);
+  if (style === 'short') {
+    // Short caps go on the free tile before/after the belt, on their own End Short Tile.
+    for (const [c, sg] of [['start', -1], ['end', 1]]) {
+      if (!capsAllowed.has(`${e.id}:${c}`)) continue;
+      push(`belt/${c}-short`, e, 'body', d.baseColor, at(sg * (0.5 + 0.135)));
+      push('tile/end-short', e, 'tile', d.tileColor, { ...at(sg), rotation: (e.direction + (c === 'start' ? 8 : 0)) % 16 });
+    }
   }
 }

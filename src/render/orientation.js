@@ -85,17 +85,18 @@ export const PIECE_OFFSET = {
  * Chains are followed (items sit on belt tops, which sit on belt bottoms).
  */
 export const STACK_ON = {
-  // The chevron top rests on the ledge 3.25 mm up inside the 7 mm belt base.
-  'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.15 },
-  'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.15 },
-  'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.15 },
+  // The chevron plate (2.76 mm) rests on the base's 4.75 mm support plateau: its surface ends
+  // at 7.5 mm, so the 7 mm plus pegs slot into it and the 6 mm side rails stay below it.
+  'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.09 },
+  'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.09 },
+  'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.09 },
   'belt/underground-in-top': { on: 'belt/underground-in-bottom', inset: 0.2 },
   'belt/underground-out-top': { on: 'belt/underground-out-bottom', inset: 0.2 },
   'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.02 },
-  'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.15 },
-  'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.15 },
-  'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.15 },
-  'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.15 },
+  'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.12 },
+  'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.09 },
+  'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.125 },
+  'belt/end-medium-top': { on: 'belt/end-medium-bottom', inset: 0.09 },
   'inserter/basic-closed': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/basic-open': { on: 'inserter/base-single', inset: 0.1 },
   'inserter/long-closed': { on: 'inserter/base-single', inset: 0.1 },
