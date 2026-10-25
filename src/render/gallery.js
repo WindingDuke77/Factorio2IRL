@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { getGeometry, loadManifest } from './models.js';
 import { makeLabel, localTransform } from './build.js';
-import { PIECE_ROTATION } from './orientation.js';
+import { partConfig } from './orientation.js';
 
 export async function runGallery(scene, filter = '') {
   const manifest = await loadManifest();
@@ -31,7 +31,7 @@ export async function runGallery(scene, filter = '') {
       const x = (i % cols) * spacing;
       const z = Math.floor(i / cols) * spacing;
       const mesh = new THREE.Mesh(geo, mat);
-      const rot = PIECE_ROTATION[key] ?? 0;
+      const rot = partConfig(key).rotation ?? 0;
       const { tilt, offset } = localTransform(key, geo);
       const local = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z).multiply(tilt);
       mesh.matrixAutoUpdate = false;

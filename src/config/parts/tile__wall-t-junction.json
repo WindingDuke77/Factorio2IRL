@@ -1,0 +1,18 @@
+{
+  "key": "tile/wall-t-junction",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Tile; sits in the grid plate pocket (levels.json)."
+}

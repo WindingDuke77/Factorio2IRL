@@ -1,0 +1,61 @@
+{
+  "entity": "electric-mining-drill",
+  "parts": [
+    {
+      "key": "drill/frame",
+      "pos": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "key": "drill/bit",
+      "pos": [
+        0,
+        0.1,
+        0
+      ]
+    },
+    {
+      "key": "drill/rod",
+      "pos": [
+        0,
+        0.8,
+        0
+      ]
+    },
+    {
+      "key": "drill/head",
+      "pos": [
+        0,
+        1.42,
+        0
+      ]
+    },
+    {
+      "key": "drill/leg",
+      "from": "head",
+      "to": "railEnd0",
+      "t": 0.3
+    },
+    {
+      "key": "drill/leg",
+      "from": "head",
+      "to": "railEnd1",
+      "t": 0.3
+    },
+    {
+      "key": "drill/rail",
+      "from": "head",
+      "to": "railEnd0",
+      "t": 0.78
+    },
+    {
+      "key": "drill/rail",
+      "from": "head",
+      "to": "railEnd1",
+      "t": 0.78
+    }
+  ]
+}

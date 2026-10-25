@@ -1,0 +1,18 @@
+{
+  "key": "grid/6x8",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Grid plate; sits on the ground."
+}

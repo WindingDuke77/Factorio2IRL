@@ -1,0 +1,18 @@
+{
+  "key": "belt/start-long-top",
+  "rotation": 12,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": "belt/start-long-bottom",
+  "inset": 0.12,
+  "rawFrame": false,
+  "notes": "Belt pieces flow along +X in their own file; rotation 12 turns that to north."
+}

@@ -1,0 +1,18 @@
+{
+  "key": "chest/steel-lid",
+  "rotation": 0,
+  "tilt": {
+    "x": -72,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": -0.02,
+    "z": -0.27
+  },
+  "stackOn": "chest/steel-open",
+  "inset": 0.02,
+  "rawFrame": false,
+  "notes": "Chests sit on an Empty Tile. Open lids are tilted at the back hinge."
+}

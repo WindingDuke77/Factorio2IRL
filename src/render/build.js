@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { getGeometry, loadManifest, ANCHORED } from './models.js';
-import { PIECE_ROTATION, PIECE_TILT, PIECE_OFFSET, STACK_ON, COMPOSITES, RAW_FRAME, TILE_FLOOR, TILE_THICK, TILE_POCKET } from './orientation.js';
+import { partConfig, COMPOSITES, LEVELS } from './orientation.js';
 
 const DEG = Math.PI / 180;
 
@@ -36,23 +36,26 @@ const placeholderEdge = new THREE.LineBasicMaterial({ color: 0xffa200 });
  */
 export function localTransform(key, geo, info = null, mmPerTile = 25) {
   const box = geo.boundingBox ?? (geo.computeBoundingBox(), geo.boundingBox);
+  const cfg = partConfig(key);
   let tilt = new THREE.Matrix4();
   const offset = new THREE.Vector3();
-  if (RAW_FRAME.test(key) && info?.bboxRaw) {
+  const extra = cfg.offset ?? { x: 0, y: 0, z: 0 };
+  if (cfg.rawFrame && info?.bboxRaw) {
     // Undo the converter's bbox-centring: raw (x, y) -> world (x, -y), scaled to tiles.
     const r = info.bboxRaw;
-    offset.set((r.min[0] + r.max[0]) / 2 / mmPerTile, -box.min.y, -((r.min[1] + r.max[1]) / 2) / mmPerTile);
+    offset.set((r.min[0] + r.max[0]) / 2 / mmPerTile + extra.x, -box.min.y + extra.y, -((r.min[1] + r.max[1]) / 2) / mmPerTile + extra.z);
     return { tilt, offset };
   }
-  const fixed = PIECE_TILT[key];
-  if (fixed) {
+  const fixed = cfg.tilt;
+  if (fixed && (fixed.x || fixed.y || fixed.z)) {
     tilt = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler((fixed.x ?? 0) * DEG, (fixed.y ?? 0) * DEG, (fixed.z ?? 0) * DEG, 'XYZ'));
   }
-  if (ANCHORED.has(key)) return { tilt, offset };
+  if (ANCHORED.has(key)) {
+    offset.set(extra.x, extra.y, extra.z);
+    return { tilt, offset };
+  }
   const tilted = box.clone().applyMatrix4(tilt);
-  offset.set(-(tilted.min.x + tilted.max.x) / 2, -tilted.min.y, -(tilted.min.z + tilted.max.z) / 2);
-  const extra = PIECE_OFFSET[key];
-  if (extra) offset.add(new THREE.Vector3(...extra));
+  offset.set(-(tilted.min.x + tilted.max.x) / 2 + extra.x, -tilted.min.y + extra.y, -(tilted.min.z + tilted.max.z) / 2 + extra.z);
   return { tilt, offset };
 }
 
@@ -135,16 +138,16 @@ export async function buildBlueprintGroup(placements, view = {}) {
   // Which shaped tile each entity sits in (bodies sink into its pocket).
   const tileByEntity = new Map();
   for (const p of placements.pieces) if (p.group === 'tile' && p.entityId != null) tileByEntity.set(p.entityId, p.key);
-  const plateFloor = show.showGrid ? TILE_FLOOR : 0;
+  const plateFloor = show.showGrid ? LEVELS.tileFloor : 0;
   const bodyFloorFor = (entityId) => {
     if (!show.showTiles) return plateFloor;
     const tile = tileByEntity.get(entityId);
-    return plateFloor + (tile && tile !== 'tile/empty' ? TILE_POCKET : TILE_THICK);
+    return plateFloor + (tile && tile !== 'tile/empty' ? LEVELS.tilePocket : LEVELS.tileThick);
   };
   const stackBase = (key, depth = 0) => {
-    const s = STACK_ON[key];
-    if (!s || depth > 4) return 0;
-    return stackBase(s.on, depth + 1) + Math.max(0, heightOf(s.on) - (s.inset ?? 0));
+    const c = partConfig(key);
+    if (!c.stackOn || depth > 4) return 0;
+    return stackBase(c.stackOn, depth + 1) + Math.max(0, heightOf(c.stackOn) - (c.inset ?? 0));
   };
 
   // Group instances by (key, color).
@@ -187,7 +190,7 @@ export async function buildBlueprintGroup(placements, view = {}) {
   await Promise.all(
     [...buckets.values()].map(async (b) => {
       const baseY = baseYFor(b);
-      const rotOffset = PIECE_ROTATION[b.key] ?? 0;
+      const rotOffset = partConfig(b.key).rotation ?? 0;
       const composite = COMPOSITES[b.key];
       if (composite) {
         let any = false;
@@ -217,7 +220,7 @@ export async function buildBlueprintGroup(placements, view = {}) {
   );
 
   // Placeholders: boxes with orange edges and a floating label (off by default).
-  const phBase = plateFloor + (show.showTiles ? TILE_THICK : 0);
+  const phBase = plateFloor + (show.showTiles ? LEVELS.tileThick : 0);
   for (const ph of show.showMissing ? placements.placeholders : []) {
     const h = 0.6;
     const box = new THREE.Mesh(new THREE.BoxGeometry(ph.w - 0.08, h, ph.h - 0.08), placeholderMat);

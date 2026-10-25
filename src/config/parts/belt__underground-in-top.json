@@ -1,0 +1,18 @@
+{
+  "key": "belt/underground-in-top",
+  "rotation": 4,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 90
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": "belt/underground-in-bottom",
+  "inset": 0.25,
+  "rawFrame": false,
+  "notes": "Printed standing on its mouth; tilt z 90 lays it over the base, mouth toward the incoming belt."
+}

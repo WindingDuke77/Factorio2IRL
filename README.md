@@ -29,7 +29,8 @@ Then open http://localhost:5173, paste a blueprint string (or load a sample) and
 by key prefix and picks a camera (`iso`, `top`, `front`, `bottom`). `?dev` ("Model check" in the
 top bar) cycles through every entity type and belt/wall configuration as a tiny blueprint on its
 grid plate, through the normal pipeline: Prev/Next/Rotate, arrow keys and R, `&i=<n>&d=<dir>` to
-deep-link, `&view=top` for a top-down camera.
+deep-link, `&view=top` for a top-down camera. In `?dev` a **Tune parts** panel lists every piece
+in the current scene and lets you change its placement live and save it (see *Tuning parts*).
 
 ## Models
 
@@ -59,7 +60,7 @@ npm run models        # = fetch-models + convert-models
 - Three STLs are print plates of loose parts: the electric mining drill (frame, drill bit, rod,
   head, legs, rails, pipes), the steel furnace (body + six pipes) and the small electric pole
   (base + two identical half-shells glued back to back). `convert-models` splits them into connected
-  components (`drill/*`, `steel-furnace/body`, `pole/*`) and `src/render/orientation.js` assembles
+  components (`drill/*`, `steel-furnace/body`, `pole/*`) and `src/config/composites/*.json` assembles
   them. Wall pieces are modelled around their tile, so they are placed by their raw offset rather
   than their bounding-box centre.
 - Inserter arms are printed flat and folded at two hex hinges (see Wube's assembly guide); the
@@ -76,15 +77,50 @@ npm run models        # = fetch-models + convert-models
   medium piece plus the cap within the belt's tile.
 - Chests can be drawn closed (one piece) or open (body + lid propped at the back hinge); logistic
   chests always carry their separate lid plate. Both are counted in the parts list.
-- `src/render/orientation.js` documents how each model is oriented in its own file (belts flow
-  east, turn pieces pivot at the NW corner, underground hoods are modelled standing on their
-  mouth, inserter arms are flat side profiles, "Ending N" walls have the free end facing north).
+- How each model is oriented in its own file (belts flow east, turn pieces pivot at the NW corner,
+  underground hoods are modelled standing on their mouth, inserter arms are flat side profiles,
+  "Ending N" walls have the free end facing north) is captured per piece in `src/config/parts/`.
+
+## Tuning parts
+
+Every converted piece has a JSON file in `src/config/parts/` (the key with `/` replaced by `__`,
+so `belt/underground-in-top` is `belt__underground-in-top.json`). Units are tiles (1 = 25 mm)
+and degrees:
+
+| field | meaning |
+|---|---|
+| `rotation` | 0/4/8/12 = 0/90/180/270° added to the entity direction so the model faces north |
+| `tilt` | degrees about the piece's own X/Y/Z, for pieces modelled in a printing pose (hoods, lids, the splitter base) |
+| `offset` | tiles, added after the piece is centred on its tile; `y` raises it, `x`/`z` slide it (z negative = towards the front of the tile) |
+| `stackOn` | key of the piece it sits on (belt top on belt bottom, lid on chest, arm on inserter base) |
+| `inset` | how far (tiles) it sinks into that piece; `0` rests on its top |
+| `rawFrame` | keep the STL's raw offset instead of centring (walls are modelled around their tile) |
+| `notes` | free text |
+
+`src/config/levels.json` holds the stacking heights of the base-plate system (grid plate pocket
+floor, tile thickness, shaped-tile pocket). `src/config/composites/<entity>.json` lists the parts
+of the drill, the steel furnace and the pole with a position and rotation each (or an anchor line
+for the drill legs and rails).
+
+The quickest way to adjust them is the **Tune parts** panel in `?dev`: pick a scenario with
+Prev/Next, open a piece, change a number and the scene rebuilds at once; **Save** writes the
+file through the dev server, **Reset** goes back to the saved values. Editing the JSON by hand
+works too (the dev server reloads it). What to check for each piece, against Wube's assembly
+photos:
+
+- it sits on the right part (`stackOn`) at the right height: no gap underneath and not sunk
+  into it (`inset`, or `offset.y` for a one-off nudge);
+- it faces the right way for direction north (`rotation`), and belts/hoods face their neighbours
+  once rotated (check in `&d=4` too);
+- it lies the right way up (`tilt`) and is centred on its tile (`offset.x`/`offset.z`).
 
 ## Project layout
 
 ```
 src/blueprint/   decode.js, normalize.js, entities.js, belts.js, walls.js, grid.js, placements.js
-src/render/      scene.js, models.js, build.js, orientation.js, gallery.js
+src/render/      scene.js, models.js, build.js, orientation.js (loads src/config), gallery.js
+src/config/      parts/*.json (one per piece), composites/*.json, levels.json
+src/dev/         cycler.js (model check), tune.js (tuning panel + save via vite.config.js)
 src/bom/         bom.js (parts list + text/CSV export)
 src/ui/          bomPanel.js
 scripts/         Printables API, catalog, fetch and convert scripts, sample generator

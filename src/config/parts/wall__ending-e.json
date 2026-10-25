@@ -1,0 +1,18 @@
+{
+  "key": "wall/ending-e",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": true,
+  "notes": "Modelled around its tile (rawFrame): the raw X/Y offset is kept instead of bbox-centring."
+}

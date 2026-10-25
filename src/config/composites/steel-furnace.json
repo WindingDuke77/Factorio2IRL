@@ -1,0 +1,13 @@
+{
+  "entity": "steel-furnace",
+  "parts": [
+    {
+      "key": "steel-furnace/body",
+      "pos": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "entity": "small-electric-pole",
+  "parts": [
+    {
+      "key": "pole/base",
+      "pos": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "key": "pole/profile",
+      "pos": [
+        0,
+        0.62,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "key": "pole/profile",
+      "pos": [
+        0,
+        0.62,
+        0
+      ],
+      "rot": [
+        0,
+        180,
+        0
+      ]
+    }
+  ]
+}

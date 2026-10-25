@@ -1,0 +1,18 @@
+{
+  "key": "item/science-bottle",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": "belt/straight-top",
+  "inset": 0.01,
+  "rawFrame": false,
+  "notes": "Belt item; sits on the belt top."
+}

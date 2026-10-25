@@ -1,0 +1,18 @@
+{
+  "key": "belt/underground-in-bottom",
+  "rotation": 4,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Belt pieces flow along +X in their own file; rotation 12 turns that to north."
+}

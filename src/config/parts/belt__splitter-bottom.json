@@ -1,0 +1,18 @@
+{
+  "key": "belt/splitter-bottom",
+  "rotation": 12,
+  "tilt": {
+    "x": 180,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Printed deck-down; tilt x 180 puts the deck up with the two top halves on it."
+}

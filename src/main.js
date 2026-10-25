@@ -32,7 +32,7 @@ const state = {
 
 const scene = createScene($('view'));
 // Debug handle (used by the dev tooling and browser console).
-window.__f2i = { state, scene, THREE };
+window.__f2i = { state, scene, THREE, rebuild: () => rebuildScene(false) };
 
 // ---------------------------------------------------------------------------
 // Piece gallery (?gallery) — every converted model laid out for inspection.
@@ -146,7 +146,9 @@ async function init() {
   const params = new URLSearchParams(location.search);
   if (params.has('dev')) {
     const { installDevCycler } = await import('./dev/cycler.js');
+    const { installTuner } = await import('./dev/tune.js');
     installDevCycler({ onLoad: (json) => renderFromText(JSON.stringify(json)) });
+    installTuner({ state, rebuild: () => rebuildScene(false) });
   } else if (params.get('sample')) {
     sel.value = params.get('sample');
     loadSample(params.get('sample'));

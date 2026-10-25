@@ -1,0 +1,18 @@
+{
+  "key": "belt/turn-l-top",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": "belt/turn-bottom",
+  "inset": 0.07,
+  "rawFrame": false,
+  "notes": "Quarter circle, pivot at the NW corner; enters from the west, exits north."
+}

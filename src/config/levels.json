@@ -1,0 +1,6 @@
+{
+  "tileFloor": 0.06,
+  "tileThick": 0.08,
+  "tilePocket": 0.04,
+  "notes": "Tiles (in tiles, 1 = 25 mm): the grid plate pocket floor, the tile thickness, and the floor of a shaped tile pocket."
+}

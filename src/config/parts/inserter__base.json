@@ -1,0 +1,18 @@
+{
+  "key": "inserter/base",
+  "rotation": 8,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Flat print folded at its two hex hinges in models.js; rotation 8 points the hand to the drop side."
+}

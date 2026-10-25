@@ -1,0 +1,18 @@
+{
+  "key": "chest/iron-open",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Chests sit on an Empty Tile. Open lids are tilted at the back hinge."
+}
