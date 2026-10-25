@@ -58,8 +58,10 @@ npm run models        # = fetch-models + convert-models
   not drawn.
 - Three STLs are print plates of loose parts: the electric mining drill (frame, drill bit, rod,
   head, legs, rails, pipes), the steel furnace (body + six pipes) and the small electric pole
-  (base + two flat profiles that cross). `convert-models` splits them into connected components
-  (`drill/*`, `steel-furnace/body`, `pole/*`) and `src/render/orientation.js` assembles them.
+  (base + two identical half-shells glued back to back). `convert-models` splits them into connected
+  components (`drill/*`, `steel-furnace/body`, `pole/*`) and `src/render/orientation.js` assembles
+  them. Wall pieces are modelled around their tile, so they are placed by their raw offset rather
+  than their bounding-box centre.
 - Inserter arms are printed flat and folded at two hex hinges (see Wube's assembly guide); the
   loader folds them the same way (`foldArm` in `src/render/models.js`).
 - Belt items (gear, circuit, copper cable, plate, steel plate, science bottle) are placed two per
