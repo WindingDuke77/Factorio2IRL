@@ -77,7 +77,7 @@ function partMatrix(part, geo) {
  * @returns {Promise<{ group: THREE.Group, missingKeys: string[] }>}
  */
 export async function buildBlueprintGroup(placements, view = {}) {
-  const show = { showBodies: true, showTiles: false, showGrid: true, showMissing: false, ...view };
+  const show = { showBodies: true, showTiles: true, showGrid: true, showMissing: false, ...view };
   const manifest = await loadManifest();
   const group = new THREE.Group();
   const { bounds } = placements;
@@ -98,7 +98,7 @@ export async function buildBlueprintGroup(placements, view = {}) {
   for (const p of placements.pieces) {
     if (p.group === 'hardware') continue;
     if ((p.group === 'body' || p.group === 'item') && !show.showBodies) continue;
-    if (p.group === 'tile' && !show.showTiles) continue;
+    if (p.group === 'tile' && (!show.showTiles || p.entityId == null)) continue; // filler tiles are counted, not drawn
     if (p.group === 'grid' && !show.showGrid) continue;
     const k = `${p.key}|${p.color}`;
     if (!buckets.has(k)) buckets.set(k, { key: p.key, color: p.color, group: p.group, items: [] });

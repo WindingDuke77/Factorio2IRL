@@ -119,6 +119,9 @@ export function installDevCycler({ onLoad }) {
     <p class="mt-2 text-xs text-f-muted">Each entry is a tiny blueprint rendered through the normal pipeline on its grid plate. ← → step, R rotates.</p>`;
   const anchor = document.getElementById('bp-input')?.closest('.panel');
   anchor?.parentElement?.insertBefore(panel, anchor);
+  // Keep the 3D view close: hide the Blueprint and Print options panels in dev mode.
+  anchor?.classList.add('hidden');
+  document.getElementById('opt-endStyle')?.closest('.panel')?.classList.add('hidden');
 
   const select = panel.querySelector('#dev-select');
   scenarios.forEach((s, i) => {

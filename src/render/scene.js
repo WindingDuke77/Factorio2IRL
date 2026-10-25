@@ -79,11 +79,20 @@ export function createScene(canvas) {
   }
 
   function frame(bounds, view = 'iso') {
+    // The canvas may not be laid out yet on first load; wait for a real size before fitting.
+    const el = canvas.parentElement ?? canvas;
+    const cw = el.clientWidth;
+    const chh = el.clientHeight;
+    if (!cw || !chh) {
+      requestAnimationFrame(() => frame(bounds, view));
+      return;
+    }
+    resize();
     const w = Math.max(bounds?.w ?? 6, 1);
     const h = Math.max(bounds?.h ?? 6, 1);
     const radius = Math.max(w, h) * 0.58 + 1.5;
     const vFov = THREE.MathUtils.degToRad(camera.fov / 2);
-    const hFov = Math.atan(Math.tan(vFov) * Math.max(camera.aspect, 0.2));
+    const hFov = Math.atan(Math.tan(vFov) * Math.min(Math.max(cw / chh, 0.5), 3));
     const dist = Math.max(radius / Math.tan(vFov), radius / Math.tan(hFov));
     controls.target.set(0, 0.4, 0);
     if (view === 'top') {

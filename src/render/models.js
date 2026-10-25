@@ -180,16 +180,39 @@ function standUpWideEndUp(geo) {
   return geo;
 }
 
+/**
+ * Re-centre a geometry in X/Z on the centroid of the vertices within a height band (e.g. the
+ * pole's post rather than its asymmetric crossarm, or a base's top socket).
+ */
+function centreOnBand(geo, yFrom, yTo) {
+  const pos = geo.attributes.position;
+  let sx = 0;
+  let sz = 0;
+  let k = 0;
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    if (y >= yFrom && y <= yTo) {
+      sx += pos.getX(i);
+      sz += pos.getZ(i);
+      k++;
+    }
+  }
+  if (k) geo.translate(-sx / k, 0, -sz / k);
+  geo.computeBoundingBox();
+  return geo;
+}
+
 const POST_PROCESS = {
   'inserter/basic-closed': (g) => foldArm(g, { upper: 30, fore: 110 }),
   'inserter/basic-open': (g) => foldArm(g, { upper: 30, fore: 110 }),
   'inserter/bulk-closed': (g) => foldArm(g, { upper: 30, fore: 110 }),
   'inserter/bulk-open': (g) => foldArm(g, { upper: 30, fore: 110 }),
-  'inserter/stack-closed': (g) => foldArm(g, { upper: 30, fore: 110 }),
-  'inserter/stack-open': (g) => foldArm(g, { upper: 30, fore: 110 }),
+  'inserter/stack-closed': (g) => foldArm(g, { upper: 25, fore: 150 }),
+  'inserter/stack-open': (g) => foldArm(g, { upper: 25, fore: 150 }),
   'inserter/long-closed': (g) => foldArm(g, { upper: 45, fore: 110 }),
   'inserter/long-open': (g) => foldArm(g, { upper: 45, fore: 110 }),
-  'pole/profile': standUpWideEndUp,
+  'pole/profile': (g) => centreOnBand(standUpWideEndUp(g), 0.3, 2.2),
+  'pole/base': (g) => centreOnBand(g, 0.55, 0.8),
 };
 
 /** Keys whose geometry is already anchored (origin = mount point, y=0 = base); never re-centred. */

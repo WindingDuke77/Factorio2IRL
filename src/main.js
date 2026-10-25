@@ -1,4 +1,5 @@
 import './style.css';
+import * as THREE from 'three';
 import samples from './data/samples.json' with { type: 'json' };
 import { decodeBlueprintString } from './blueprint/decode.js';
 import { flattenBook, normalizeBlueprint } from './blueprint/normalize.js';
@@ -23,13 +24,15 @@ const state = {
   group: null,
   options: { ...DEFAULT_OPTIONS },
   variant: 'precision',
-  view: { showBodies: true, showTiles: false, showGrid: true, showMissing: false }, // tiles are printed but not drawn: models sit on the plates
+  view: { showBodies: true, showTiles: true, showGrid: true, showMissing: false }, // entity tiles drawn, filler tiles only counted
   mmPerTile: 25,
   missingKeys: [],
   buildToken: 0,
 };
 
 const scene = createScene($('view'));
+// Debug handle (used by the dev tooling and browser console).
+window.__f2i = { state, scene, THREE };
 
 // ---------------------------------------------------------------------------
 // Piece gallery (?gallery) — every converted model laid out for inspection.
@@ -253,7 +256,7 @@ async function rebuildScene(frame = false) {
   state.group = group;
   state.missingKeys = missingKeys;
   scene.setContent(group, state.placements.bounds);
-  if (frame) scene.frame(state.placements.bounds, 'iso');
+  if (frame) scene.frame(state.placements.bounds, new URLSearchParams(location.search).get('view') || 'iso');
   $('view-loading').classList.add('hidden');
   $('view-empty').classList.add('hidden');
   renderNotes();

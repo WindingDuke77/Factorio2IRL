@@ -101,7 +101,7 @@ export function buildPlacements(normalized, options = {}) {
       case 'wall': {
         const s = wallShapes.get(e.id);
         push(s.piece, e, 'body', d.color, { rotation: 0 });
-        push(s.tile, e, 'tile', d.tileColor, { rotation: 0 });
+        push(s.tile, e, 'tile', d.tileColor, { rotation: s.rotation ?? 0 });
         cover(e);
         break;
       }

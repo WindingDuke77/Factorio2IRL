@@ -26,7 +26,10 @@ Then open http://localhost:5173, paste a blueprint string (or load a sample) and
 **Render**. `npm run build` writes a static site to `dist/`.
 
 `?gallery` shows every converted piece laid out for inspection; `?gallery=belt/&view=top` filters
-by key prefix and picks a camera (`iso`, `top`, `front`, `bottom`).
+by key prefix and picks a camera (`iso`, `top`, `front`, `bottom`). `?dev` ("Model check" in the
+top bar) cycles through every entity type and belt/wall configuration as a tiny blueprint on its
+grid plate, through the normal pipeline: Prev/Next/Rotate, arrow keys and R, `&i=<n>&d=<dir>` to
+deep-link, `&view=top` for a top-down camera.
 
 ## Models
 
@@ -51,7 +54,8 @@ npm run models        # = fetch-models + convert-models
   23.9 mm so they drop into the plates.
 - Every belt tile is a *Bottom* (base with rollers) plus a *Top* (chevron surface), snapped into a
   shaped *Tile*, which pins into a *Grid* base plate. Pin counts in the parts list are estimates.
-  The 3D view draws models directly on the grid plates (the thin tiles are counted, not drawn).
+  The 3D view draws each model on its own shaped tile on the grid plate; the Empty Tiles that fill
+  unused cells are counted in the parts list but not drawn.
 - Three STLs are print plates of loose parts: the electric mining drill (frame, drill bit, rod,
   head, legs, rails, pipes), the steel furnace (body + six pipes) and the small electric pole
   (base + two flat profiles that cross). `convert-models` splits them into connected components
