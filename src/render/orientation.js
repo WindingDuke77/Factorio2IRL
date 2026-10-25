@@ -67,6 +67,9 @@ export const PIECE_ROTATION = {
 export const PIECE_TILT = {
   'belt/underground-in-top': { z: 90 },
   'belt/underground-out-top': { z: 90 },
+  // The splitter base is printed deck-down; installed, the flat deck faces up and the two
+  // yellow halves sit on it (see Wube's belt guide).
+  'belt/splitter-bottom': { x: 180 },
   // Open chest lids are propped up at the back hinge.
   'chest/wooden-lid': { x: -72 },
   'chest/iron-lid': { x: -72 },
@@ -90,9 +93,10 @@ export const STACK_ON = {
   'belt/straight-top': { on: 'belt/straight-bottom', inset: 0.09 },
   'belt/turn-l-top': { on: 'belt/turn-bottom', inset: 0.09 },
   'belt/turn-r-top': { on: 'belt/turn-bottom', inset: 0.09 },
-  'belt/underground-in-top': { on: 'belt/underground-in-bottom', inset: 0.2 },
-  'belt/underground-out-top': { on: 'belt/underground-out-bottom', inset: 0.2 },
-  'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.02 },
+  // Hood feet drop ~2.5 mm into the notches on the base's side rails (rail top at 5.1 mm).
+  'belt/underground-in-top': { on: 'belt/underground-in-bottom', inset: 0.25 },
+  'belt/underground-out-top': { on: 'belt/underground-out-bottom', inset: 0.25 },
+  'belt/splitter-top': { on: 'belt/splitter-bottom', inset: 0.0 },
   'belt/start-long-top': { on: 'belt/start-long-bottom', inset: 0.12 },
   'belt/start-medium-top': { on: 'belt/start-medium-bottom', inset: 0.09 },
   'belt/end-long-top': { on: 'belt/end-long-bottom', inset: 0.125 },
