@@ -8,8 +8,8 @@
   },
   "offset": {
     "x": 0,
-    "y": 0,
-    "z": 0
+    "y": -0.08,
+    "z": 0.08
   },
   "stackOn": "inserter/base-single",
   "inset": 0.1,
