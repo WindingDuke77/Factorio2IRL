@@ -106,12 +106,14 @@ export function buildPlacements(normalized, options = {}) {
         break;
       }
       case 'splitter': {
-        // Per Wube's guide a splitter sits over two Straight Bottoms (one per lane); the splitter
-        // base is a cover that goes over them and carries the top.
+        // Per Wube's guide each splitter lane is a normal belt (Straight Bottom + Straight Top, so the
+        // tops follow the belt-top placement), with the splitter base and its mechanism over them.
         {
           const right = DIR_VEC[rotateDirCW(e.direction)];
           for (const side of [-0.5, 0.5]) {
-            push('belt/straight-bottom', e, 'body', d.baseColor, { x: e.x + right.x * side, y: e.y + right.y * side });
+            const at = { x: e.x + right.x * side, y: e.y + right.y * side };
+            push('belt/straight-bottom', e, 'body', d.baseColor, at);
+            push('belt/straight-top', e, 'body', d.color, at);
           }
         }
         push('belt/splitter-top', e, 'body', d.color);
