@@ -1,5 +1,7 @@
 # Factorio2IRL
 
+**Live site: https://windingduke77.github.io/Factorio2IRL/**
+
 Paste a Factorio blueprint string, see it rendered in 3D out of Wube Software's **official
 3D-printable models**, and get the list of parts you need to print to build it for real.
 
