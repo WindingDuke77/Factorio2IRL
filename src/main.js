@@ -12,7 +12,6 @@ import { createScene } from './render/scene.js';
 import { buildBlueprintGroup, disposeGroup } from './render/build.js';
 import { loadManifest } from './render/models.js';
 import { renderBomPanel, renderHeaderStats } from './ui/bomPanel.js';
-import { runGallery } from './render/gallery.js';
 import { detectItems, BELT_ITEMS } from './blueprint/items.js';
 
 const $ = (id) => document.getElementById(id);
@@ -48,11 +47,11 @@ window.__f2i = { state, scene, THREE, rebuild: () => rebuildScene(false), PARTS,
 
 // ---------------------------------------------------------------------------
 // Piece gallery (?gallery) — every converted model laid out for inspection.
-if (new URLSearchParams(location.search).has('gallery')) {
+if (import.meta.env.DEV && new URLSearchParams(location.search).has('gallery')) {
   document.title = 'Factorio2IRL — piece gallery';
   $('view-title').textContent = 'Piece gallery';
   $('view-empty').classList.add('hidden');
-  runGallery(scene, new URLSearchParams(location.search).get('gallery') || '');
+  import('./render/gallery.js').then(({ runGallery }) => runGallery(scene, new URLSearchParams(location.search).get('gallery') || ''));
 } else {
   init();
 }
@@ -195,7 +194,7 @@ async function init() {
   const saved = loadSaved();
   if (saved) applySavedSettings(saved);
   persistBlueprint = !params.has('dev') && !params.has('gallery');
-  if (params.has('dev')) {
+  if (import.meta.env.DEV && params.has('dev')) {
     const { installDevCycler } = await import('./dev/cycler.js');
     const { installTuner } = await import('./dev/tune.js');
     installDevCycler({ onLoad: (json) => renderFromText(JSON.stringify(json)) });

@@ -158,12 +158,12 @@ test/            node --test unit tests (decode, directions, belt shapes, walls,
 
 ## GitHub Pages
 
-The repo is private, so Pages is not set up. To publish later: make the repo public (or use a
-plan that allows Pages on private repos), then build with the sub-path and deploy `dist/`:
-
-```bash
-BASE_PATH=/Factorio2IRL/ npm run build
-```
+`.github/workflows/pages.yml` builds and deploys the site on every push to `main`: it runs the
+tests, fetches the original STLs from Printables (cached by the catalog's hash) so the Pack
+download works, builds with `BASE_PATH=/<repo>/`, and publishes `dist/` with GitHub Pages
+(source: GitHub Actions). On a free account the repository has to be public for Pages. The dev
+tooling (`?dev`, `?gallery`, the tuning panel) is only part of dev builds (`npm run dev`), not of
+the published site.
 
 ## Credits
 
