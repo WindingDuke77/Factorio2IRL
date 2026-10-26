@@ -1,6 +1,6 @@
 {
   "mmPerTile": 25,
-  "generated": "2026-10-25T22:50:16.686Z",
+  "generated": "2026-10-26T00:17:23.116Z",
   "pieces": {
     "assembling-machine": {
       "file": "assembling-machine.glb",
@@ -3130,74 +3130,6 @@
         2.6708
       ]
     },
-    "inserter/stack-closed": {
-      "file": "inserter__stack-closed.glb",
-      "triangles": 9842,
-      "trianglesRaw": 9842,
-      "bboxRaw": {
-        "min": [
-          -68.978,
-          -18.528,
-          0
-        ],
-        "max": [
-          -29.663,
-          30.853,
-          3.236
-        ]
-      },
-      "bbox": {
-        "min": [
-          -0.7863,
-          0,
-          -0.9876
-        ],
-        "max": [
-          0.7863,
-          0.1294,
-          0.9876
-        ]
-      },
-      "size": [
-        1.5726,
-        0.1294,
-        1.9752
-      ]
-    },
-    "inserter/stack-open": {
-      "file": "inserter__stack-open.glb",
-      "triangles": 9842,
-      "trianglesRaw": 9842,
-      "bboxRaw": {
-        "min": [
-          -72.286,
-          -18.528,
-          0
-        ],
-        "max": [
-          -25.49,
-          29.524,
-          3.236
-        ]
-      },
-      "bbox": {
-        "min": [
-          -0.9359,
-          0,
-          -0.961
-        ],
-        "max": [
-          0.9359,
-          0.1294,
-          0.961
-        ]
-      },
-      "size": [
-        1.8718,
-        0.1294,
-        1.9221
-      ]
-    },
     "item/circuit": {
       "file": "item__circuit.glb",
       "triangles": 5450,
@@ -4872,8 +4804,8 @@
         2.9154
       ]
     },
-    "drill/leg": {
-      "file": "drill__leg.glb",
+    "drill/housing": {
+      "file": "drill__housing.glb",
       "triangles": 39996,
       "trianglesRaw": 73904,
       "part": {
@@ -4986,19 +4918,19 @@
         0.348
       ]
     },
-    "drill/rail": {
-      "file": "drill__rail.glb",
-      "triangles": 8426,
-      "trianglesRaw": 8426,
+    "drill/hose-a": {
+      "file": "drill__hose-a.glb",
+      "triangles": 16852,
+      "trianglesRaw": 16852,
       "part": {
         "of": "electric-mining-drill",
-        "rank": 6
+        "rank": "6"
       },
       "bboxRaw": {
         "min": [
           154.346,
           137.399,
-          9.224
+          7.828
         ],
         "max": [
           164.664,
@@ -5014,18 +4946,56 @@
         ],
         "max": [
           0.2064,
-          0.0558,
+          0.1117,
           0.3896
         ]
       },
       "size": [
         0.4127,
-        0.0558,
+        0.1117,
         0.7793
       ]
     },
-    "drill/pipe": {
-      "file": "drill__pipe.glb",
+    "drill/hose-b": {
+      "file": "drill__hose-b.glb",
+      "triangles": 16764,
+      "trianglesRaw": 16764,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": "8"
+      },
+      "bboxRaw": {
+        "min": [
+          154.75,
+          114.833,
+          7.83
+        ],
+        "max": [
+          165.066,
+          135.227,
+          10.618
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.2063,
+          0,
+          -0.4079
+        ],
+        "max": [
+          0.2063,
+          0.1115,
+          0.4079
+        ]
+      },
+      "size": [
+        0.4126,
+        0.1115,
+        0.8158
+      ]
+    },
+    "drill/chain": {
+      "file": "drill__chain.glb",
       "triangles": 5902,
       "trianglesRaw": 5902,
       "part": {
@@ -5060,6 +5030,120 @@
         0.9565,
         0.2811,
         0.2484
+      ]
+    },
+    "drill/peg": {
+      "file": "drill__peg.glb",
+      "triangles": 4968,
+      "trianglesRaw": 4968,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 12
+      },
+      "bboxRaw": {
+        "min": [
+          130.336,
+          110.089,
+          9.224
+        ],
+        "max": [
+          134.972,
+          114.401,
+          14.424
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.0927,
+          0,
+          -0.0862
+        ],
+        "max": [
+          0.0927,
+          0.208,
+          0.0862
+        ]
+      },
+      "size": [
+        0.1854,
+        0.208,
+        0.1725
+      ]
+    },
+    "drill/bracket": {
+      "file": "drill__bracket.glb",
+      "triangles": 732,
+      "trianglesRaw": 732,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 13
+      },
+      "bboxRaw": {
+        "min": [
+          111.688,
+          121.673,
+          9.224
+        ],
+        "max": [
+          120.12,
+          128.893,
+          20.014
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1686,
+          0,
+          -0.1444
+        ],
+        "max": [
+          0.1686,
+          0.4316,
+          0.1444
+        ]
+      },
+      "size": [
+        0.3373,
+        0.4316,
+        0.2888
+      ]
+    },
+    "drill/plate": {
+      "file": "drill__plate.glb",
+      "triangles": 238,
+      "trianglesRaw": 238,
+      "part": {
+        "of": "electric-mining-drill",
+        "rank": 14
+      },
+      "bboxRaw": {
+        "min": [
+          96.798,
+          67.263,
+          9.224
+        ],
+        "max": [
+          108.576,
+          78.853,
+          12.636
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.2356,
+          0,
+          -0.2318
+        ],
+        "max": [
+          0.2356,
+          0.1365,
+          0.2318
+        ]
+      },
+      "size": [
+        0.4711,
+        0.1365,
+        0.4636
       ]
     },
     "steel-furnace/body": {
@@ -5098,6 +5182,158 @@
         1.6065,
         2.1107,
         1.5661
+      ]
+    },
+    "steel-furnace/pipe-long": {
+      "file": "steel-furnace__pipe-long.glb",
+      "triangles": 39056,
+      "trianglesRaw": 39056,
+      "part": {
+        "of": "steel-furnace",
+        "rank": "1"
+      },
+      "bboxRaw": {
+        "min": [
+          -59.777,
+          -26.197,
+          -1.522
+        ],
+        "max": [
+          -34.942,
+          -7.42,
+          1.522
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.4967,
+          0,
+          -0.3756
+        ],
+        "max": [
+          0.4967,
+          0.1218,
+          0.3756
+        ]
+      },
+      "size": [
+        0.9934,
+        0.1218,
+        0.7511
+      ]
+    },
+    "steel-furnace/pipe-medium": {
+      "file": "steel-furnace__pipe-medium.glb",
+      "triangles": 13760,
+      "trianglesRaw": 13760,
+      "part": {
+        "of": "steel-furnace",
+        "rank": "3"
+      },
+      "bboxRaw": {
+        "min": [
+          -56.619,
+          -2.34,
+          -1.941
+        ],
+        "max": [
+          -32.021,
+          14.211,
+          1.941
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.492,
+          0,
+          -0.331
+        ],
+        "max": [
+          0.492,
+          0.1553,
+          0.331
+        ]
+      },
+      "size": [
+        0.9839,
+        0.1553,
+        0.662
+      ]
+    },
+    "steel-furnace/pipe-small": {
+      "file": "steel-furnace__pipe-small.glb",
+      "triangles": 6196,
+      "trianglesRaw": 6196,
+      "part": {
+        "of": "steel-furnace",
+        "rank": "5"
+      },
+      "bboxRaw": {
+        "min": [
+          -42.343,
+          9.255,
+          -1.283
+        ],
+        "max": [
+          -32.5,
+          18.98,
+          1.279
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.1969,
+          0,
+          -0.1945
+        ],
+        "max": [
+          0.1969,
+          0.1025,
+          0.1945
+        ]
+      },
+      "size": [
+        0.3937,
+        0.1025,
+        0.389
+      ]
+    },
+    "steel-furnace/collar": {
+      "file": "steel-furnace__collar.glb",
+      "triangles": 520,
+      "trianglesRaw": 520,
+      "part": {
+        "of": "steel-furnace",
+        "rank": "7"
+      },
+      "bboxRaw": {
+        "min": [
+          -41.557,
+          4.252,
+          -1.941
+        ],
+        "max": [
+          -40.116,
+          8.134,
+          1.941
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.0288,
+          0,
+          -0.0776
+        ],
+        "max": [
+          0.0288,
+          0.1553,
+          0.0776
+        ]
+      },
+      "size": [
+        0.0577,
+        0.1553,
+        0.1553
       ]
     },
     "pole/base": {
@@ -5174,6 +5410,120 @@
         0.9315,
         0.0941,
         3.2182
+      ]
+    },
+    "pole/profile-b": {
+      "file": "pole__profile-b.glb",
+      "triangles": 10888,
+      "trianglesRaw": 10888,
+      "part": {
+        "of": "small-electric-pole",
+        "rank": 2
+      },
+      "bboxRaw": {
+        "min": [
+          16.826,
+          66.661,
+          23.163
+        ],
+        "max": [
+          40.112,
+          147.117,
+          25.515
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.4657,
+          0,
+          -1.6091
+        ],
+        "max": [
+          0.4657,
+          0.0941,
+          1.6091
+        ]
+      },
+      "size": [
+        0.9314,
+        0.0941,
+        3.2182
+      ]
+    },
+    "inserter/stack-closed": {
+      "file": "inserter__stack-closed.glb",
+      "triangles": 9842,
+      "trianglesRaw": 9842,
+      "part": {
+        "of": "inserter/stack-closed",
+        "rank": "sel"
+      },
+      "bboxRaw": {
+        "min": [
+          -46.627,
+          -18.528,
+          0
+        ],
+        "max": [
+          -29.614,
+          30.853,
+          4.758
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.3403,
+          0,
+          -0.9876
+        ],
+        "max": [
+          0.3403,
+          0.1903,
+          0.9876
+        ]
+      },
+      "size": [
+        0.6805,
+        0.1903,
+        1.9752
+      ]
+    },
+    "inserter/stack-open": {
+      "file": "inserter__stack-open.glb",
+      "triangles": 9842,
+      "trianglesRaw": 9842,
+      "part": {
+        "of": "inserter/stack-open",
+        "rank": "sel"
+      },
+      "bboxRaw": {
+        "min": [
+          -50.801,
+          -18.528,
+          0
+        ],
+        "max": [
+          -25.49,
+          30.254,
+          4.758
+        ]
+      },
+      "bbox": {
+        "min": [
+          -0.5062,
+          0,
+          -0.9756
+        ],
+        "max": [
+          0.5062,
+          0.1903,
+          0.9756
+        ]
+      },
+      "size": [
+        1.0124,
+        0.1903,
+        1.9513
       ]
     }
   }

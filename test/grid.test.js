@@ -24,7 +24,7 @@ test('tilePlates covers the whole footprint', () => {
   const area = plates.reduce((a, p) => a + p.w * p.h, 0);
   assert.equal(area, 13 * 4);
   assert.equal(plates.length, 2);
-  assert.equal(pins, 1);
+  assert.equal(pins, 2, 'one Grid PIN per plate');
 });
 
 test('placements produce bodies, tiles, empty tiles and plates', () => {

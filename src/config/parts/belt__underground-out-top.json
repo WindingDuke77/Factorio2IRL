@@ -4,11 +4,11 @@
   "tilt": {
     "x": 0,
     "y": 0,
-    "z": 90
+    "z": 101
   },
   "offset": {
-    "x": 0,
-    "y": 0,
+    "x": -0.028,
+    "y": -0.31,
     "z": 0
   },
   "stackOn": "belt/underground-out-bottom",

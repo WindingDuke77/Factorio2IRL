@@ -175,7 +175,9 @@ function standUpWideEndUp(geo) {
   pos.needsUpdate = true;
   geo.computeBoundingBox();
   const nb = geo.boundingBox;
-  geo.translate(-(nb.max.x + nb.min.x) / 2, -nb.min.y, -(nb.max.z + nb.min.z) / 2);
+  // Centre X, floor Y; leave Z alone so the flat printed face stays at z = 0 and two half-shells
+  // stood up this way (one from each end of the plate) meet back to back.
+  geo.translate(-(nb.max.x + nb.min.x) / 2, -nb.min.y, 0);
   geo.computeBoundingBox();
   return geo;
 }
@@ -184,7 +186,7 @@ function standUpWideEndUp(geo) {
  * Re-centre a geometry in X/Z on the centroid of the vertices within a height band (e.g. the
  * pole's post rather than its asymmetric crossarm, or a base's top socket).
  */
-function centreOnBand(geo, yFrom, yTo) {
+function centreOnBand(geo, yFrom, yTo, axes = 'xz') {
   const pos = geo.attributes.position;
   let sx = 0;
   let sz = 0;
@@ -197,7 +199,7 @@ function centreOnBand(geo, yFrom, yTo) {
       k++;
     }
   }
-  if (k) geo.translate(-sx / k, 0, -sz / k);
+  if (k) geo.translate(axes.includes('x') ? -sx / k : 0, 0, axes.includes('z') ? -sz / k : 0);
   geo.computeBoundingBox();
   return geo;
 }
@@ -211,7 +213,10 @@ const POST_PROCESS = {
   'inserter/stack-open': (g) => foldArm(g, { upper: 25, fore: 150 }),
   'inserter/long-closed': (g) => foldArm(g, { upper: 45, fore: 110 }),
   'inserter/long-open': (g) => foldArm(g, { upper: 45, fore: 110 }),
-  'pole/profile': (g) => centreOnBand(standUpWideEndUp(g), 0.3, 2.2),
+  // The two different half-shells: each is stood up from its own wide (crossarm) end, which puts
+  // their flat faces on opposite sides of z = 0, so they mate without any extra rotation.
+  'pole/profile': (g) => centreOnBand(standUpWideEndUp(g), 0.3, 2.2, 'x'),
+  'pole/profile-b': (g) => centreOnBand(standUpWideEndUp(g), 0.3, 2.2, 'x'),
   'pole/base': (g) => centreOnBand(g, 0.55, 0.8),
 };
 

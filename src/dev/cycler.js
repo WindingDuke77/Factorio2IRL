@@ -37,7 +37,7 @@ function layout(label, rows) {
 
 export function buildScenarios() {
   const scenarios = [];
-  const add = (id, label, fn) => scenarios.push({ id, label, make: fn });
+  const add = (id, label, fn, options) => scenarios.push({ id, label, make: fn, options });
 
   // Belts and belt structures
   const tiers = [['transport-belt', 'underground-belt', 'splitter'], ['fast-transport-belt', 'fast-underground-belt', 'fast-splitter'], ['express-transport-belt', 'express-underground-belt', 'express-splitter']];
@@ -49,6 +49,11 @@ export function buildScenarios() {
     add(`${belt}-sideload`, `${belt}: side-load`, layout(`${belt} sideload`, [[belt, 0.5, 1.5, 0], [belt, 0.5, 0.5, 0], [belt, 0.5, -0.5, 0], [belt, 1.5, 0.5, 12]]));
     add(`${ug}`, `${ug}: pair`, layout(`${ug}`, [[belt, 0.5, 2.5, 0], [ug, 0.5, 1.5, 0, { type: 'input' }], [ug, 0.5, -1.5, 0, { type: 'output' }], [belt, 0.5, -2.5, 0]]));
     add(`${sp}`, `${sp}: with belts`, layout(`${sp}`, [[belt, 0.5, 1.5, 0], [belt, 1.5, 1.5, 0], [sp, 1, 0.5, 0], [belt, 0.5, -0.5, 0], [belt, 1.5, -0.5, 0]]));
+  }
+
+  // Belt ends: one scenario per end style so the end pieces can be tuned in the panel.
+  for (const style of ['short', 'long', 'medium']) {
+    add(`belt-end-${style}`, `transport-belt: ${style} ends`, layout(`belt ends ${style}`, [['transport-belt', 0.5, 1.5, 0], ['transport-belt', 0.5, 0.5, 0], ['transport-belt', 0.5, -0.5, 0]]), { endStyle: style });
   }
 
   // Inserters with a chest behind and a belt in front
@@ -133,6 +138,11 @@ export function installDevCycler({ onLoad }) {
   const DIR_NAME = { 0: 'N', 4: 'E', 8: 'S', 12: 'W' };
   const show = () => {
     const s = scenarios[index];
+    // Scenario options drive the matching Print options control (e.g. belt end style).
+    for (const [k, v] of Object.entries(s.options ?? {})) {
+      const el = document.getElementById(`opt-${k}`);
+      if (el && el.value !== String(v)) { el.value = String(v); el.dispatchEvent(new Event('change')); }
+    }
     select.value = String(index);
     panel.querySelector('#dev-dir').textContent = DIR_NAME[dir];
     panel.querySelector('#dev-pos').textContent = `${index + 1} / ${scenarios.length}`;

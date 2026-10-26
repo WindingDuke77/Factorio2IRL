@@ -64,24 +64,11 @@ export function tilePlates(bounds) {
     }
     y += h;
   }
-  // Estimate: one pin per shared edge between neighbouring plates.
-  const pins = sharedEdges(plates);
+  // One Grid PIN per plate.
+  const pins = plates.length;
   return { plates, pins, cols, rows };
 }
 
-function sharedEdges(plates) {
-  let count = 0;
-  for (let i = 0; i < plates.length; i++) {
-    for (let j = i + 1; j < plates.length; j++) {
-      const a = plates[i];
-      const b = plates[j];
-      const touchX = (a.x + a.w === b.x || b.x + b.w === a.x) && overlap(a.y, a.h, b.y, b.h);
-      const touchY = (a.y + a.h === b.y || b.y + b.h === a.y) && overlap(a.x, a.w, b.x, b.w);
-      if (touchX || touchY) count++;
-    }
-  }
-  return count;
-}
 function overlap(a, al, b, bl) {
   return Math.min(a + al, b + bl) - Math.max(a, b) > 0;
 }

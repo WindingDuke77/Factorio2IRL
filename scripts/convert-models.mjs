@@ -130,11 +130,85 @@ function normalise(pos, rawBox, mmPerTile) {
 // furnace body plus its pipes; the pole's base and two flat profiles). We split them into connected
 // components (ranked by triangle count, largest first) and write the useful ones as their own pieces
 // so the renderer can assemble them. Ranks were checked against the raw files; see README.
-const SPLIT_PARTS = {
-  'electric-mining-drill': { 'drill/head': 0, 'drill/frame': 1, 'drill/leg': 2, 'drill/bit': 4, 'drill/rod': 5, 'drill/rail': 6, 'drill/pipe': 10 },
-  'steel-furnace': { 'steel-furnace/body': 0 },
-  'small-electric-pole': { 'pole/base': 0, 'pole/profile': 1 },
+// A part spec is a component rank, or { ranks | select, mirror } / { pieces: [...] }:
+//   ranks    component ranks (largest first) to merge
+//   select   (box) => bool over component bounding boxes {min,max,centre}
+//   mirror   also add the part mirrored across its own bed plane (half-pipes printed flat -> full pipe)
+//   pieces   several {ranks|select, translate:[x,y,z], rotateY:{deg, about:[x,z]}} merged into one part
+// The stack inserter plate carries a second hand assembly beside the arm; Wube's photos show it
+// stacked on the arm's own hand (one plate thickness higher), giving the double claw.
+const STACK_DOUBLE = {
+  pieces: [
+    { select: (b) => b.centre[0] > -49 },
+    { select: (b) => b.centre[0] <= -49, translate: [22.4, 5.65, 2.4] },
+  ],
 };
+const SPLIT_PARTS = {
+  'electric-mining-drill': {
+    'drill/head': 0, 'drill/frame': 1, 'drill/housing': 2, 'drill/bit': 4, 'drill/rod': 5,
+    'drill/hose-a': { ranks: [6], mirror: true }, 'drill/hose-b': { ranks: [8], mirror: true },
+    'drill/chain': 10, 'drill/peg': 12, 'drill/bracket': 13, 'drill/plate': 14,
+  },
+  'steel-furnace': {
+    'steel-furnace/body': 0,
+    'steel-furnace/pipe-long': { ranks: [1], mirror: true },
+    'steel-furnace/pipe-medium': { ranks: [3], mirror: true },
+    'steel-furnace/pipe-small': { ranks: [5], mirror: true },
+    'steel-furnace/collar': { ranks: [7], mirror: true },
+  },
+  'small-electric-pole': { 'pole/base': 0, 'pole/profile': 1, 'pole/profile-b': 2 },
+  'inserter/stack-closed': { 'inserter/stack-closed': STACK_DOUBLE },
+  'inserter/stack-open': { 'inserter/stack-open': STACK_DOUBLE },
+};
+const SPLIT_KEYS = new Set(Object.values(SPLIT_PARTS).flatMap((m) => Object.keys(m)));
+
+function compBox(c) {
+  const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < c.length; i += 3) for (let k = 0; k < 3; k++) { min[k] = Math.min(min[k], c[i + k]); max[k] = Math.max(max[k], c[i + k]); }
+  return { min, max, centre: min.map((m, k) => (m + max[k]) / 2) };
+}
+function concatParts(arrs) {
+  const out = new Float32Array(arrs.reduce((n, a) => n + a.length, 0));
+  let o = 0;
+  for (const a of arrs) { out.set(a, o); o += a.length; }
+  return out;
+}
+/** Build one part from the components of a print plate according to a spec (see SPLIT_PARTS). */
+function assemblePart(spec, comps) {
+  if (typeof spec === 'number') return comps[spec];
+  const pieces = spec.pieces ?? [{ ranks: spec.ranks, select: spec.select }];
+  const parts = [];
+  for (const pc of pieces) {
+    const sel = pc.ranks ? pc.ranks.map((r) => comps[r]) : comps.filter((c) => pc.select(compBox(c)));
+    for (const src of sel) {
+      if (!src) throw new Error('component missing');
+      const c = Float32Array.from(src);
+      if (pc.translate) for (let i = 0; i < c.length; i += 3) { c[i] += pc.translate[0]; c[i + 1] += pc.translate[1]; c[i + 2] += pc.translate[2]; }
+      if (pc.rotateY) {
+        const th = (pc.rotateY.deg * Math.PI) / 180, [x0, z0] = pc.rotateY.about, cs = Math.cos(th), sn = Math.sin(th);
+        for (let i = 0; i < c.length; i += 3) {
+          const dx = c[i] - x0, dz = c[i + 2] - z0;
+          c[i] = x0 + dx * cs + dz * sn;
+          c[i + 2] = z0 - dx * sn + dz * cs;
+        }
+      }
+      parts.push(c);
+    }
+  }
+  let merged = concatParts(parts);
+  if (spec.mirror) {
+    const zmin = compBox(merged).min[2];
+    const m = new Float32Array(merged.length);
+    for (let t = 0; t < merged.length; t += 9) {
+      // Mirror across the bed plane and swap two vertices so the winding stays outward.
+      for (const [from, to] of [[0, 0], [3, 6], [6, 3]]) {
+        m[t + to] = merged[t + from]; m[t + to + 1] = merged[t + from + 1]; m[t + to + 2] = 2 * zmin - merged[t + from + 2];
+      }
+    }
+    merged = concatParts([merged, m]);
+  }
+  return merged;
+}
 
 /** Connected components of a triangle soup (vertices welded at 0.01 mm). Sorted largest first. */
 function splitComponents(pos) {
@@ -307,6 +381,7 @@ async function main() {
 
   console.log('\n== Converting ==');
   for (const e of pieces) {
+    if (SPLIT_KEYS.has(e.key)) continue; // produced from the print plate below
     const file = e.key.replaceAll('/', '__') + '.glb';
     const src = rawPath(e);
     const out = path.join(OUT_DIR, file);
@@ -365,9 +440,10 @@ async function main() {
       const pos = parseStl(await fs.readFile(src));
       const comps = splitComponents(pos);
       console.log(`  ${srcKey}: ${comps.length} components`);
-      for (const [partKey, rank] of Object.entries(parts)) {
-        const part = comps[rank];
-        if (!part) { failures.push(`${partKey}: component rank ${rank} missing`); stats.failed++; continue; }
+      for (const [partKey, spec] of Object.entries(parts)) {
+        const rank = typeof spec === 'number' ? spec : (spec.ranks?.join('+') ?? 'sel');
+        let part;
+        try { part = assemblePart(spec, comps); } catch (err) { failures.push(`${partKey}: ${err.message}`); stats.failed++; continue; }
         const file = partKey.replaceAll('/', '__') + '.glb';
         const trianglesRaw = part.length / 9;
         const bboxRaw = bbox(part);

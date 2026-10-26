@@ -1,5 +1,5 @@
 {
-  "key": "drill/leg",
+  "key": "steel-furnace/pipe-medium",
   "rotation": 0,
   "tilt": {
     "x": 0,
@@ -14,5 +14,5 @@
   "stackOn": null,
   "inset": 0,
   "rawFrame": false,
-  "notes": ""
+  "notes": "D-profile pipe printed flat; mirrored into a full pipe by the converter."
 }

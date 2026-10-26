@@ -116,7 +116,7 @@ export function buildPlacements(normalized, options = {}) {
         }
         push('belt/splitter-top', e, 'body', d.color);
         push('belt/splitter-bottom', e, 'body', d.baseColor);
-        push('belt/splitter-pin', e, 'hardware', PIN_COLOR, { qty: 2 });
+        push('belt/splitter-pin', e, 'hardware', PIN_COLOR, { qty: 1 }); // the Splitter Pin file is a set of two
         push('tile/splitter', e, 'tile', d.tileColor);
         cover(e);
         break;
@@ -263,10 +263,9 @@ function addBeltPieces(push, e, s, opt, capsAllowed = new Set()) {
     return;
   }
   if (cap && style === 'medium') {
-    // Medium piece (0.76) + short cap (0.27) share the tile.
+    // Medium piece on its End Medium Tile (no separate cap).
     push(`belt/${cap}-medium-top`, e, 'body', d.color, at(-sign * 0.12));
     push(`belt/${cap}-medium-bottom`, e, 'body', d.baseColor, at(-sign * 0.12));
-    push(`belt/${cap}-short`, e, 'body', d.baseColor, at(sign * 0.365));
     push('tile/end-medium', e, 'tile', d.tileColor, { rotation: capRot });
     return;
   }

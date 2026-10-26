@@ -1,5 +1,5 @@
 {
-  "key": "drill/rail",
+  "key": "drill/housing",
   "rotation": 0,
   "tilt": {
     "x": 0,
@@ -14,5 +14,5 @@
   "stackOn": null,
   "inset": 0,
   "rawFrame": false,
-  "notes": ""
+  "notes": "Leg housing: the chain strut slides into it; its block end mounts on the head side."
 }

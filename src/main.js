@@ -1,3 +1,4 @@
+import { PARTS, COMPOSITES, LEVELS } from './render/orientation.js';
 import './style.css';
 import * as THREE from 'three';
 import samples from './data/samples.json' with { type: 'json' };
@@ -32,7 +33,7 @@ const state = {
 
 const scene = createScene($('view'));
 // Debug handle (used by the dev tooling and browser console).
-window.__f2i = { state, scene, THREE, rebuild: () => rebuildScene(false) };
+window.__f2i = { state, scene, THREE, rebuild: () => rebuildScene(false), PARTS, COMPOSITES, LEVELS };
 
 // ---------------------------------------------------------------------------
 // Piece gallery (?gallery) — every converted model laid out for inspection.

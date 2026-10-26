@@ -29,7 +29,8 @@ Then open http://localhost:5173, paste a blueprint string (or load a sample) and
 by key prefix and picks a camera (`iso`, `top`, `front`, `bottom`). `?dev` ("Model check" in the
 top bar) cycles through every entity type and belt/wall configuration as a tiny blueprint on its
 grid plate, through the normal pipeline: Prev/Next/Rotate, arrow keys and R, `&i=<n>&d=<dir>` to
-deep-link, `&view=top` for a top-down camera. In `?dev` a **Tune parts** panel lists every piece
+deep-link, `&view=top` for a top-down camera. The three `transport-belt: … ends` entries switch the
+belt-end option so each end style can be tuned. In `?dev` a **Tune parts** panel lists every piece
 in the current scene and lets you change its placement live and save it (see *Tuning parts*).
 
 ## Models
@@ -54,17 +55,20 @@ npm run models        # = fetch-models + convert-models
 - One Factorio tile is **25 mm** (the grid plates are exactly 25 mm × N); the shaped tiles are
   23.9 mm so they drop into the plates.
 - Every belt tile is a *Bottom* (base with rollers) plus a *Top* (chevron surface), snapped into a
-  shaped *Tile*, which pins into a *Grid* base plate. Pin counts in the parts list are estimates.
+  shaped *Tile*, which pins into a *Grid* base plate. The parts list counts one Grid PIN per plate and one Splitter Pin print (the file holds the pair) per splitter.
   The 3D view draws the same stack: grid plate, tiles (shaped ones under models, Empty Tiles
   elsewhere), models on top. Tiles can be hidden with the "Show tiles" toggle.
-- Three STLs are print plates of loose parts: the electric mining drill (frame, drill bit, rod,
-  head, legs, rails, pipes), the steel furnace (body + six pipes) and the small electric pole
-  (base + two identical half-shells glued back to back). `convert-models` splits them into connected
-  components (`drill/*`, `steel-furnace/body`, `pole/*`) and `src/config/composites/*.json` assembles
-  them. Wall pieces are modelled around their tile, so they are placed by their raw offset rather
-  than their bounding-box centre.
+- Three STLs are print plates of loose parts, split into connected components by `convert-models`
+  and assembled by `src/config/composites/*.json` (positions and rotations per part, tunable in
+  `?dev`): the electric mining drill (frame, auger, drive rod, head, two leg housings with chain
+  struts, two hoses, hydraulic pistons, peg, bracket), the steel furnace (body plus three pipes, each
+  printed as two D-profile halves which the converter mirrors into a round pipe) and the small
+  electric pole (base plus two different half-shells, `pole/profile` and `pole/profile-b`, stood up
+  from their own crossarm ends so they meet at their flat faces). Wall pieces are modelled around
+  their tile, so they are placed by their raw offset rather than their bounding-box centre.
 - Inserter arms are printed flat and folded at two hex hinges (see Wube's assembly guide); the
-  loader folds them the same way (`foldArm` in `src/render/models.js`).
+  loader folds them the same way (`foldArm` in `src/render/models.js`). The stack inserter plate
+  also carries a second hand, which the converter stacks on the arm's own hand for the double claw.
 - Belt items (gear, circuit, copper cable, plate, steel plate, science bottle) are placed two per
   lane on straight belts. "Auto" picks the item from the blueprint's recipes, filters, logistic
   requests and icons; you can also force one item or a mix.
@@ -73,8 +77,8 @@ npm run models        # = fetch-models + convert-models
   (2 mm) drop into that pocket, shaped tiles have a 1 mm pocket the model base sits in, and the
   belt top rests on the 4.75 mm plateau inside its base, so the plus pegs slot into the plate.
 - Belt ends are optional (default none): "short" puts the rounded cap on the free tile before/after
-  the belt (with its End Short Tile), "long" uses the integrated end piece, "medium" uses the
-  medium piece plus the cap within the belt's tile.
+  the belt (with its End Short Tile), "long" uses the integrated end piece, "medium" the medium
+  piece on its End Medium Tile.
 - Chests can be drawn closed (one piece) or open (body + lid propped at the back hinge); logistic
   chests always carry their separate lid plate. Both are counted in the parts list.
 - How each model is oriented in its own file (belts flow east, turn pieces pivot at the NW corner,

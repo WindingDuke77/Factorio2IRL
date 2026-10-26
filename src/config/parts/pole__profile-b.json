@@ -1,0 +1,18 @@
+{
+  "key": "pole/profile-b",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "Second half-shell (the one printed at the other end of the plate); stood up like pole/profile, they meet at their flat faces."
+}

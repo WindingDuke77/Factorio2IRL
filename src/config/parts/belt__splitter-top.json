@@ -7,9 +7,9 @@
     "z": 0
   },
   "offset": {
-    "x": 0,
+    "x": 0.01,
     "y": 0,
-    "z": 0
+    "z": 0.03
   },
   "stackOn": "belt/splitter-bottom",
   "inset": 0,

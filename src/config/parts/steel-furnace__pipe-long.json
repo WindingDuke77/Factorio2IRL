@@ -1,0 +1,18 @@
+{
+  "key": "steel-furnace/pipe-long",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "D-profile pipe printed flat; the converter mirrors it into a full pipe. Placed by composites/steel-furnace.json."
+}

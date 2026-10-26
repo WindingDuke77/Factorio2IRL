@@ -1,0 +1,18 @@
+{
+  "key": "steel-furnace/pipe-small",
+  "rotation": 0,
+  "tilt": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "stackOn": null,
+  "inset": 0,
+  "rawFrame": false,
+  "notes": "D-profile elbow printed flat; mirrored into a full pipe by the converter."
+}

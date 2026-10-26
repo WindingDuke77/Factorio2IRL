@@ -14,5 +14,5 @@
   "stackOn": "inserter/base-single",
   "inset": 0.1,
   "rawFrame": false,
-  "notes": "Flat print folded at its two hex hinges in models.js; rotation 8 points the hand to the drop side."
+  "notes": "Print plate: arm strip plus the second hand, stacked on the first by the converter; folded at two hinges in models.js."
 }

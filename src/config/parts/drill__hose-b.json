@@ -1,5 +1,5 @@
 {
-  "key": "drill/pipe",
+  "key": "drill/hose-b",
   "rotation": 0,
   "tilt": {
     "x": 0,
@@ -14,5 +14,5 @@
   "stackOn": null,
   "inset": 0,
   "rawFrame": false,
-  "notes": ""
+  "notes": "Hose printed in halves; mirrored into a round hose."
 }

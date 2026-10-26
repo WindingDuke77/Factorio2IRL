@@ -2,13 +2,13 @@
   "key": "belt/straight-top",
   "rotation": 12,
   "tilt": {
-    "x": 2.5,
+    "x": 0,
     "y": 0,
     "z": 0
   },
   "offset": {
     "x": 0,
-    "y": 0,
+    "y": 0.033,
     "z": 0
   },
   "stackOn": "belt/straight-bottom",

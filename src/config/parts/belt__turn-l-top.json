@@ -7,9 +7,9 @@
     "z": 0
   },
   "offset": {
-    "x": 0,
-    "y": 0,
-    "z": 0
+    "x": -0.07,
+    "y": 0.01,
+    "z": -0.07
   },
   "stackOn": "belt/turn-bottom",
   "inset": 0.07,
