@@ -23,8 +23,9 @@ npm run dev
 ```
 
 Then open http://localhost:5173, paste a blueprint string (or load a sample) and press
-**Render**. The blueprint, the selected book entry, the print and view options and the camera are
-kept in the browser's local storage, so a reload comes back to the same view (Clear forgets them). `npm run build` writes a static site to `dist/`.
+**Render**. The print and view options, printer and scale are kept in the browser's local storage in every
+mode; the blueprint, its book entry and the camera are kept too on the normal page, so a reload
+comes back to the same view (Clear forgets the blueprint, not the settings). `npm run build` writes a static site to `dist/`.
 
 `?gallery` shows every converted piece laid out for inspection; `?gallery=belt/&view=top` filters
 by key prefix and picks a camera (`iso`, `top`, `front`, `bottom`). `?dev` ("Model check" in the

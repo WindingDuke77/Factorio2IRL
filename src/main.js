@@ -1,5 +1,5 @@
 import { PARTS, COMPOSITES, LEVELS } from './render/orientation.js';
-import { loadSaved, saveState, clearSaved } from './persist.js';
+import { loadSaved, saveState } from './persist.js';
 import './style.css';
 import * as THREE from 'three';
 import samples from './data/samples.json' with { type: 'json' };
@@ -40,7 +40,7 @@ const state = {
 };
 const PRINTERS = printersData.printers;
 const BED_MARGIN = 3;
-let persistEnabled = false;
+let persistBlueprint = false; // the blueprint/camera are only saved from the normal page, settings always
 
 const scene = createScene($('view'));
 // Debug handle (used by the dev tooling and browser console).
@@ -104,7 +104,13 @@ async function init() {
   $('btn-clear').addEventListener('click', () => {
     $('bp-input').value = '';
     hideError();
-    clearSaved();
+    const prev = loadSaved();
+    if (prev) {
+      delete prev.text;
+      delete prev.selected;
+      delete prev.camera;
+      saveState(prev);
+    }
   });
 
   // Options
@@ -185,6 +191,10 @@ async function init() {
 
   // Deep links: ?sample=<id>, ?dev
   const params = new URLSearchParams(location.search);
+  // Saved print/view settings (printer, scale, options…) come back in every mode.
+  const saved = loadSaved();
+  if (saved) applySavedSettings(saved);
+  persistBlueprint = !params.has('dev') && !params.has('gallery');
   if (params.has('dev')) {
     const { installDevCycler } = await import('./dev/cycler.js');
     const { installTuner } = await import('./dev/tune.js');
@@ -193,16 +203,15 @@ async function init() {
   } else if (params.get('sample')) {
     sel.value = params.get('sample');
     loadSample(params.get('sample'));
-  } else {
-    const saved = loadSaved();
-    if (saved?.text) restoreSaved(saved);
+  } else if (saved?.text) {
+    restoreBlueprint(saved);
   }
-  persistEnabled = !params.has('dev') && !params.has('gallery');
   scene.controls.addEventListener('change', persist);
 }
 
 /** Put the saved options back into the controls and render the saved blueprint. */
-function restoreSaved(saved) {
+/** Put the saved print/view settings into state and the controls (no render). */
+function applySavedSettings(saved) {
   // Defaults that changed since the state was saved: belt ends became "long" (v2).
   if ((saved.defaultsVersion ?? 1) < 2 && saved.options?.endStyle === 'none') saved.options.endStyle = 'long';
   state.options = { ...DEFAULT_OPTIONS, ...(saved.options ?? {}) };
@@ -212,9 +221,12 @@ function restoreSaved(saved) {
   if (typeof saved.printer === 'string') state.printer = saved.printer;
   if (saved.bed?.w && saved.bed?.h) state.bed = { w: saved.bed.w, h: saved.bed.h };
   if (Number.isFinite(saved.scale)) state.scale = saved.scale;
+  syncControls();
+}
+/** Render the saved blueprint again, with its book entry and camera. */
+function restoreBlueprint(saved) {
   state.restoreSelected = Number.isInteger(saved.selected) ? saved.selected : null;
   state.restoreCamera = saved.camera ?? null;
-  syncControls();
   $('bp-input').value = saved.text;
   renderFromText(saved.text);
 }
@@ -245,15 +257,25 @@ function syncControls() {
 let persistTimer = null;
 /** Save the blueprint, options, selection and camera (debounced; not in dev/gallery mode). */
 function persist() {
-  if (!persistEnabled) return;
   clearTimeout(persistTimer);
   persistTimer = setTimeout(() => {
+    const prev = loadSaved() ?? {};
     const text = $('bp-input').value;
-    if (!text.trim()) return;
+    const blueprint =
+      persistBlueprint && text.trim()
+        ? {
+            text,
+            selected: state.selected,
+            camera: {
+              pos: scene.camera.position.toArray(),
+              target: scene.controls.target.toArray(),
+              bounds: state.placements ? { minX: state.placements.bounds.minX, minY: state.placements.bounds.minY, w: state.placements.bounds.w, h: state.placements.bounds.h } : null,
+            },
+          }
+        : {};
     saveState({
+      ...prev,
       defaultsVersion: 2,
-      text,
-      selected: state.selected,
       options: state.options,
       variant: state.variant,
       view: state.view,
@@ -261,11 +283,7 @@ function persist() {
       printer: state.printer,
       bed: state.bed,
       scale: state.scale,
-      camera: {
-        pos: scene.camera.position.toArray(),
-        target: scene.controls.target.toArray(),
-        bounds: state.placements ? { minX: state.placements.bounds.minX, minY: state.placements.bounds.minY, w: state.placements.bounds.w, h: state.placements.bounds.h } : null,
-      },
+      ...blueprint,
     });
   }, 400);
 }
