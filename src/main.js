@@ -33,7 +33,7 @@ const state = {
   buildToken: 0,
   restoreSelected: null, // book entry to reselect after a reload
   restoreCamera: null, // camera to restore after a reload
-  pack: { stl: true, mf: true, bed: '256x256', bedW: 256, bedH: 256, groupBy: 'colour', gap: 3, margin: 3 },
+  pack: { stl: true, mf: true, bedW: 256, bedH: 256, groupBy: 'colour', gap: 3, margin: 3 }, // bed follows the printer
   printer: 'any', // printers.json id, 'any' or 'custom'
   bed: { w: 256, h: 256 }, // custom bed (mm)
   scale: 100, // print scale (%)
@@ -166,9 +166,6 @@ async function init() {
   $('pack-cancel').addEventListener('click', closePackDialog);
   $('pack-dialog').addEventListener('click', (e) => {
     if (e.target === $('pack-dialog')) closePackDialog();
-  });
-  $('pack-bed').addEventListener('change', () => {
-    $('pack-custom').style.display = $('pack-bed').value === 'custom' ? '' : 'none';
   });
   $('pack-go').addEventListener('click', () => {
     readPackDialog();
@@ -387,12 +384,8 @@ function derivePrinter() {
   const bed = printerBed();
   const tileMm = (state.mmPerTile * state.scale) / 100;
   state.options.maxPlate = bed ? Math.max(1, Math.min(10, Math.floor((Math.min(bed.w, bed.h) - 2 * BED_MARGIN) / tileMm))) : 10;
-  if (bed) {
-    state.pack.bedW = bed.w;
-    state.pack.bedH = bed.h;
-    const preset = `${bed.w}x${bed.h}`;
-    state.pack.bed = [...$('pack-bed').options].some((o) => o.value === preset) ? preset : 'custom';
-  }
+  state.pack.bedW = bed ? bed.w : 256;
+  state.pack.bedH = bed ? bed.h : 256;
   $('opt-bed-custom').style.display = state.printer === 'custom' ? '' : 'none';
   const n = state.options.maxPlate;
   const known = state.printer === 'any' || PRINTERS.some((p) => p.id === state.printer);
@@ -415,15 +408,11 @@ function applyPrinter() {
 function openPackDialog() {
   if (!state.bom || !state.placements) return;
   const p = state.pack;
-  const bed = printerBed();
-  $('pack-note').textContent = `${bed ? `Bed pre-filled from the printer (${bed.w} × ${bed.h} mm). ` : ''}Scale ${state.scale}% (change it in Print options).`;
+  const printer = PRINTERS.find((x) => x.id === state.printer);
+  const bedFrom = state.printer === 'any' ? 'no printer chosen, default bed' : printer ? printer.name : 'custom bed';
+  $('pack-note').textContent = `Bed ${p.bedW} × ${p.bedH} mm (${bedFrom}), scale ${state.scale}%. Change them in Print options.`;
   $('pack-stl').checked = p.stl;
   $('pack-3mf').checked = p.mf;
-  $('pack-bed').value = p.bed;
-  if ($('pack-bed').value !== p.bed) $('pack-bed').value = 'custom';
-  $('pack-bed-w').value = String(p.bedW);
-  $('pack-bed-h').value = String(p.bedH);
-  $('pack-custom').style.display = $('pack-bed').value === 'custom' ? '' : 'none';
   $('pack-plates').value = p.groupBy;
   $('pack-gap').value = String(p.gap);
   $('pack-margin').value = String(p.margin);
@@ -434,21 +423,10 @@ function closePackDialog() {
 }
 function readPackDialog() {
   const clamp = (v, lo, hi, dflt) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt);
-  const bed = $('pack-bed').value;
-  let bedW;
-  let bedH;
-  if (bed === 'custom') {
-    bedW = clamp(Number($('pack-bed-w').value), 50, 1000, 256);
-    bedH = clamp(Number($('pack-bed-h').value), 50, 1000, 256);
-  } else {
-    [bedW, bedH] = bed.split('x').map(Number);
-  }
   state.pack = {
+    ...state.pack,
     stl: $('pack-stl').checked,
     mf: $('pack-3mf').checked,
-    bed,
-    bedW,
-    bedH,
     groupBy: $('pack-plates').value,
     gap: clamp(Number($('pack-gap').value), 0, 20, 3),
     margin: clamp(Number($('pack-margin').value), 0, 30, 3),
