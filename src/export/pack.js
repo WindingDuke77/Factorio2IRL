@@ -12,8 +12,10 @@ export const PACK_DEFAULTS = {
   bedH: 256,
   gap: 3, // mm between parts
   margin: 3, // mm from the bed edge
-  mixed: false, // pack all colours together
-  strict: false, // never share a plate between colours (default: small colour groups share)
+  // 'colour': one colour per plate, small colour groups share "mixed" plates
+  // 'colour-strict': never share a plate between colours; 'part': one part type per plate;
+  // 'mixed': everything together, fewest plates
+  groupBy: 'colour',
   includeStl: true,
   include3mf: true,
 };
@@ -104,31 +106,32 @@ export async function buildPackEntries({ bom, placements, label, loadStl, deflat
       entries.push({ name: `plates/${fileName}`, data: await build3mf(plate, `${label} - plate ${i + 1}`, deflate), store: true });
       const counts = new Map();
       for (const it of plate.items) counts.set(it.mesh.name, (counts.get(it.mesh.name) ?? 0) + 1);
-      index.push(`${fileName}  (${plateColours.join(', ')})\n${[...counts].map(([n, q]) => `    ${String(q).padStart(3)} x ${n}`).join('\n')}`);
+      index.push(`${fileName}  (${plateColours.join(', ')})${plate.oversize ? '  LARGER THAN THE BED' : ''}\n${[...counts].map(([n, q]) => `    ${String(q).padStart(3)} x ${n}`).join('\n')}`);
     }
-    entries.push({ name: 'plates/plates.txt', data: `${o.bedW} x ${o.bedH} mm bed, ${o.gap} mm gap\n\n${index.join('\n\n')}\n` });
+    const oversize = plates.filter((p) => p.oversize).length;
+    entries.push({ name: 'plates/plates.txt', data: `${o.bedW} x ${o.bedH} mm bed, ${o.gap} mm gap, plates by ${o.groupBy}${oversize ? `; ${oversize} part(s) larger than the bed are on plates of their own` : ''}\n\n${index.join('\n\n')}\n` });
   }
   entries.push({
     name: 'README.txt',
     data: `${label}\n\nstl/      one copy of every STL this blueprint needs; the number in front is how many to print.\nplates/   one 3MF per print plate with all instances arranged on a ${o.bedW} x ${o.bedH} mm bed, one colour per plate\n          (small colour groups share "mixed" plates). Open a plate in PrusaSlicer, Bambu Studio or OrcaSlicer, pick the filament, slice.\nparts.csv the parts list with Printables links.\n\nModels by Wube Software (CC BY-NC), https://www.printables.com/@WubeSoftware/models\n`,
   });
-  return { entries, missing, plates };
+  return { entries, missing, plates, oversize: plates.filter((p) => p.oversize).length };
 }
 
 /**
  * Shelf-pack instances onto bed-sized plates: rows of parts sorted by depth, a new row when the
- * width runs out, a new plate when the depth runs out. One colour per plate unless `mixed`;
- * colours with little to print share "mixed" plates unless `strict`.
+ * width runs out, a new plate when the depth runs out. Plates are grouped per `groupBy` (see
+ * PACK_DEFAULTS). Parts larger than the bed go on a plate of their own, flagged `oversize`.
  */
 export function arrange(instances, opts = {}) {
-  const { bedW, bedH, gap, margin, mixed, strict } = { ...PACK_DEFAULTS, ...opts };
+  const { bedW, bedH, gap, margin, groupBy } = { ...PACK_DEFAULTS, ...opts };
   const groups = new Map();
   for (const it of instances) {
-    const g = mixed ? 'all' : it.colour;
+    const g = groupBy === 'mixed' ? 'all' : groupBy === 'part' ? it.mesh.name : it.colour;
     if (!groups.has(g)) groups.set(g, []);
     groups.get(g).push(it);
   }
-  if (!mixed && !strict) {
+  if (groupBy === 'colour') {
     const bedArea = (bedW - 2 * margin) * (bedH - 2 * margin);
     const small = [...groups].filter(([, items]) => items.reduce((a, it) => a + (it.mesh.w + gap) * (it.mesh.d + gap), 0) < bedArea / 4);
     if (small.length > 1) {
@@ -158,18 +161,24 @@ export function arrange(instances, opts = {}) {
     for (const it of items) {
       const w = it.mesh.w;
       const d = it.mesh.d;
-      if (x + w > bedW - margin && x > margin) {
+      const oversize = w > bedW - 2 * margin || d > bedH - 2 * margin;
+      if ((x + w > bedW - margin && x > margin) || oversize) {
         x = margin;
         y += rowDepth + gap;
         rowDepth = 0;
       }
-      if (y + d > bedH - margin && plate.items.length) newPlate();
-      plate.items.push({ ...it, x, y });
+      if ((y + d > bedH - margin || oversize) && plate.items.length) newPlate();
+      if (oversize) plate.oversize = true;
+      plate.items.push({ ...it, x, y, oversize });
+      if (oversize) {
+        newPlate();
+        continue;
+      }
       x += w + gap;
       rowDepth = Math.max(rowDepth, d);
     }
   }
-  return plates;
+  return plates.filter((p) => p.items.length);
 }
 
 // ---------------------------------------------------------------- 3MF

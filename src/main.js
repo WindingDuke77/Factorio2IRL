@@ -32,6 +32,7 @@ const state = {
   buildToken: 0,
   restoreSelected: null, // book entry to reselect after a reload
   restoreCamera: null, // camera to restore after a reload
+  pack: { stl: true, mf: true, bed: '256x256', bedW: 256, bedH: 256, groupBy: 'colour', gap: 3, margin: 3 },
 };
 let persistEnabled = false;
 
@@ -140,7 +141,20 @@ async function init() {
       window.prompt('Copy the parts list:', text);
     }
   });
-  $('btn-download-pack').addEventListener('click', () => downloadPack());
+  $('btn-download-pack').addEventListener('click', openPackDialog);
+  $('pack-cancel').addEventListener('click', closePackDialog);
+  $('pack-dialog').addEventListener('click', (e) => {
+    if (e.target === $('pack-dialog')) closePackDialog();
+  });
+  $('pack-bed').addEventListener('change', () => {
+    $('pack-custom').style.display = $('pack-bed').value === 'custom' ? '' : 'none';
+  });
+  $('pack-go').addEventListener('click', () => {
+    readPackDialog();
+    if (!state.pack.stl && !state.pack.mf) return;
+    closePackDialog();
+    downloadPack();
+  });
   $('btn-download-csv').addEventListener('click', () => {
     if (!state.bom) return;
     const blob = new Blob([bomToCsv(state.bom)], { type: 'text/csv' });
@@ -174,6 +188,7 @@ function restoreSaved(saved) {
   state.options = { ...DEFAULT_OPTIONS, ...(saved.options ?? {}) };
   state.variant = saved.variant === 'clearance' ? 'clearance' : 'precision';
   state.view = { ...state.view, ...(saved.view ?? {}) };
+  state.pack = { ...state.pack, ...(saved.pack ?? {}) };
   state.restoreSelected = Number.isInteger(saved.selected) ? saved.selected : null;
   state.restoreCamera = saved.camera ?? null;
   syncControls();
@@ -212,6 +227,7 @@ function persist() {
       options: state.options,
       variant: state.variant,
       view: state.view,
+      pack: state.pack,
       camera: {
         pos: scene.camera.position.toArray(),
         target: scene.controls.target.toArray(),
@@ -306,6 +322,48 @@ function selectBlueprint(i) {
   persist();
 }
 
+function openPackDialog() {
+  if (!state.bom || !state.placements) return;
+  const p = state.pack;
+  $('pack-stl').checked = p.stl;
+  $('pack-3mf').checked = p.mf;
+  $('pack-bed').value = p.bed;
+  if ($('pack-bed').value !== p.bed) $('pack-bed').value = 'custom';
+  $('pack-bed-w').value = String(p.bedW);
+  $('pack-bed-h').value = String(p.bedH);
+  $('pack-custom').style.display = $('pack-bed').value === 'custom' ? '' : 'none';
+  $('pack-plates').value = p.groupBy;
+  $('pack-gap').value = String(p.gap);
+  $('pack-margin').value = String(p.margin);
+  $('pack-dialog').style.display = 'flex';
+}
+function closePackDialog() {
+  $('pack-dialog').style.display = 'none';
+}
+function readPackDialog() {
+  const clamp = (v, lo, hi, dflt) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt);
+  const bed = $('pack-bed').value;
+  let bedW;
+  let bedH;
+  if (bed === 'custom') {
+    bedW = clamp(Number($('pack-bed-w').value), 50, 1000, 256);
+    bedH = clamp(Number($('pack-bed-h').value), 50, 1000, 256);
+  } else {
+    [bedW, bedH] = bed.split('x').map(Number);
+  }
+  state.pack = {
+    stl: $('pack-stl').checked,
+    mf: $('pack-3mf').checked,
+    bed,
+    bedW,
+    bedH,
+    groupBy: $('pack-plates').value,
+    gap: clamp(Number($('pack-gap').value), 0, 20, 3),
+    margin: clamp(Number($('pack-margin').value), 0, 30, 3),
+  };
+  persist();
+}
+
 /** Zip of every needed STL, the parts list and 3MF print plates, built in the browser. */
 async function downloadPack() {
   if (!state.bom || !state.placements) return;
@@ -335,10 +393,28 @@ async function buildPackZip(onProgress = () => {}) {
     const r = await fetch(url);
     return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
   };
-  const { entries, missing } = await buildPackEntries({ bom: state.bom, placements: state.placements, label: currentLabel() || 'blueprint', loadStl, deflate: deflateRawBrowser, onProgress });
+  const p = state.pack;
+  const { entries, missing, oversize } = await buildPackEntries({
+    bom: state.bom,
+    placements: state.placements,
+    label: currentLabel() || 'blueprint',
+    loadStl,
+    deflate: deflateRawBrowser,
+    onProgress,
+    includeStl: p.stl,
+    include3mf: p.mf,
+    bedW: p.bedW,
+    bedH: p.bedH,
+    gap: p.gap,
+    margin: p.margin,
+    groupBy: p.groupBy,
+  });
   onProgress('Zipping…');
   const bytes = await buildZip(entries, deflateRawBrowser);
-  if (missing.length) showError(`${missing.length} STL file(s) are not available on this server, so they are missing from the pack: ${missing.map((r) => r.filename).slice(0, 6).join(', ')}${missing.length > 6 ? '…' : ''}`);
+  const notes = [];
+  if (missing.length) notes.push(`${missing.length} STL file(s) are not available on this server, so they are missing from the pack: ${missing.map((r) => r.filename).slice(0, 6).join(', ')}${missing.length > 6 ? '…' : ''}.`);
+  if (oversize) notes.push(`${oversize} part(s) are larger than the ${p.bedW} × ${p.bedH} mm bed and sit on plates of their own (see plates.txt).`);
+  if (notes.length) showError(notes.join(' '));
   return bytes;
 }
 

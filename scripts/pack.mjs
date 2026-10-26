@@ -13,9 +13,8 @@
 //   --bed 256x256          bed size in mm (default 256x256), --gap 3 (mm between parts), --margin 3
 //   --endStyle none|short|long|medium  --inserterHand closed|open  --chests closed|open
 //   --items auto|none|<item>  --pad N  --no-fill  --no-grid  --compact
-//   --mixed-plates         pack all colours onto the same plates (default: one colour per plate, but
-//                          colours whose parts fill under a quarter of a bed share "mixed" plates)
-//   --strict-colours       never share a plate between colours
+//   --plates colour|colour-strict|part|mixed   how plates are grouped (default colour: one colour per
+//                          plate, colours with little to print share "mixed" plates)
 //   --no-3mf  --no-stl     skip one of the outputs
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -102,17 +101,16 @@ async function main() {
       }
     },
     deflate: async (bytes) => zlib.deflateRawSync(bytes, { level: 6 }),
-    onProgress: (msg) => process.stdout.write(`\r  ${msg.padEnd(60)}`),
+    onProgress: (msg) => process.stdout.isTTY && process.stdout.write(`\r  ${msg.padEnd(60)}`),
     bedW,
     bedH,
     gap: Number(val('gap', 3)),
     margin: Number(val('margin', 3)),
-    mixed: flag('mixed-plates'),
-    strict: flag('strict-colours'),
+    groupBy: val('plates', flag('mixed-plates') ? 'mixed' : flag('strict-colours') ? 'colour-strict' : 'colour'),
     includeStl: !flag('no-stl'),
     include3mf: !flag('no-3mf'),
   });
-  process.stdout.write('\r' + ' '.repeat(64) + '\r');
+  if (process.stdout.isTTY) process.stdout.write('\r' + ' '.repeat(64) + '\r');
   for (const e of entries) {
     const dst = path.join(outDir, e.name);
     await fs.mkdir(path.dirname(dst), { recursive: true });
