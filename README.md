@@ -123,8 +123,11 @@ photos:
 
 ## Slicer export
 
-See [docs/slicer-export.md](docs/slicer-export.md) for the proposed export improvements (file
-lists with links, STL packs, 3MF projects, print batches).
+`npm run pack -- --sample smelting` (or `--file my-blueprint.txt`) writes `pack/<name>/`: one copy of
+every needed STL named with its quantity, the parts list, and one 3MF per print plate with all the
+instances arranged on the bed, one colour per plate. It needs the STLs in `models-raw/`
+(`npm run fetch-models`). Flags mirror the print options; see the header of `scripts/pack.mjs`.
+[docs/slicer-export.md](docs/slicer-export.md) has the remaining ideas (file links, print batches).
 
 ## Project layout
 

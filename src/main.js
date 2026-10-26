@@ -211,7 +211,11 @@ function persist() {
       options: state.options,
       variant: state.variant,
       view: state.view,
-      camera: { pos: scene.camera.position.toArray(), target: scene.controls.target.toArray() },
+      camera: {
+        pos: scene.camera.position.toArray(),
+        target: scene.controls.target.toArray(),
+        bounds: state.placements ? { minX: state.placements.bounds.minX, minY: state.placements.bounds.minY, w: state.placements.bounds.w, h: state.placements.bounds.h } : null,
+      },
     });
   }, 400);
 }
@@ -331,7 +335,9 @@ async function rebuildScene(frame = false) {
   if (frame) {
     const restore = state.restoreCamera;
     state.restoreCamera = null;
-    scene.frame(state.placements.bounds, new URLSearchParams(location.search).get('view') || 'iso', restore);
+    const b = state.placements.bounds;
+    const sameFootprint = restore?.bounds && ['minX', 'minY', 'w', 'h'].every((k) => restore.bounds[k] === b[k]);
+    scene.frame(b, new URLSearchParams(location.search).get('view') || 'iso', sameFootprint ? restore : null);
   }
   $('view-loading').classList.add('hidden');
   $('view-empty').classList.add('hidden');

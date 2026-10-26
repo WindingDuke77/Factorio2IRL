@@ -11,7 +11,8 @@
     "test": "node --test",
     "fetch-models": "node scripts/fetch-models.mjs",
     "convert-models": "node scripts/convert-models.mjs",
-    "models": "npm run fetch-models && npm run convert-models"
+    "models": "npm run fetch-models && npm run convert-models",
+    "pack": "node scripts/pack.mjs"
   },
   "dependencies": {
     "three": "^0.186.1"

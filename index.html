@@ -57,9 +57,9 @@
         <div id="header-stats" class="flex gap-2"></div>
       </div>
 
-      <main class="grid grid-cols-1 gap-3 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_340px]">
-        <!-- Left column -->
-        <div>
+      <main class="grid grid-cols-1 gap-3 lg:h-[calc(100vh-24px)] lg:min-h-0 lg:grid-cols-[300px_minmax(0,1fr)_320px] xl:grid-cols-[300px_minmax(0,1fr)_340px]">
+        <!-- Left column: scrolls on its own on wide screens -->
+        <div class="lg:min-h-0 lg:overflow-y-auto lg:pr-1">
           <div class="panel">
             <h2>Blueprint</h2>
             <textarea id="bp-input" class="f-textarea" spellcheck="false" placeholder="Paste a blueprint string (starts with 0eNq…) or raw blueprint JSON here"></textarea>
@@ -161,7 +161,7 @@
         </div>
 
         <!-- Centre: 3D view -->
-        <div class="panel flex min-h-[520px] flex-col lg:h-[calc(100vh-24px)] lg:self-start">
+        <div class="panel flex min-h-[520px] flex-col lg:h-full lg:min-h-0">
           <div class="flex items-center justify-between gap-2">
             <h2 id="view-title" class="mb-0! truncate">3D view</h2>
             <ul class="tabs tabs-for-panel m-0!">
@@ -183,8 +183,8 @@
           <div id="view-notes" class="mt-2 flex flex-wrap gap-2 text-xs text-f-muted"></div>
         </div>
 
-        <!-- Right: parts list -->
-        <div class="panel lg:col-span-2 xl:col-span-1">
+        <!-- Right: parts list, scrolls on its own on wide screens -->
+        <div class="panel lg:min-h-0 lg:overflow-y-auto">
           <div class="flex items-center justify-between gap-2">
             <h2 class="mb-0!">Parts to print</h2>
             <span class="flex gap-1">

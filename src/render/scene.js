@@ -99,8 +99,10 @@ export function createScene(canvas) {
       camera.position.fromArray(restore.pos);
       controls.target.fromArray(restore.target);
     } else if (view === 'top') {
-      // Straight down with north (−Z) at the top of the screen.
-      camera.position.set(0, dist, 0.0001);
+      // Straight down with north (−Z) at the top of the screen, fitting the whole footprint.
+      const pad = 0.75;
+      const d = Math.max((h / 2 + pad) / Math.tan(vFov), (w / 2 + pad) / Math.tan(hFov));
+      camera.position.set(0, d, 0.0001);
     } else if (view === 'front') {
       camera.position.set(0, dist * 0.45, dist * 0.9);
     } else {
