@@ -18,6 +18,7 @@ export const DEFAULT_OPTIONS = Object.freeze({
   fillEmpty: true, // put an Empty Tile on every uncovered cell inside the footprint
   includeGrid: true, // add grid base plates + pins
   compactPlates: false, // plates (and empty tiles) only where cells are occupied, not the whole rectangle
+  maxPlate: 10, // largest grid plate side to use (a printer bed can cap this below Wube's 10x10)
   chestsOpen: false, // draw chests with the lid off / propped open
   beltItems: 'auto', // 'none' | 'auto' | 'mixed' | an id from BELT_ITEMS
   detectedItem: null, // item id found in the blueprint (used when beltItems === 'auto')
@@ -178,7 +179,7 @@ export function buildPlacements(normalized, options = {}) {
 
   // Grid base plates: the whole footprint rectangle, or (compact) only where cells are occupied.
   let grid = { plates: [], pins: 0 };
-  if (bounds.w > 0) grid = opt.compactPlates ? tilePlatesCompact(bounds, covered) : tilePlates(bounds);
+  if (bounds.w > 0) grid = opt.compactPlates ? tilePlatesCompact(bounds, covered, opt.maxPlate) : tilePlates(bounds, opt.maxPlate);
   const inPlate = (x, y) => !opt.compactPlates || grid.plates.some((p) => x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h);
 
   // Empty tiles for every uncovered cell inside the footprint (inside a plate when compact).

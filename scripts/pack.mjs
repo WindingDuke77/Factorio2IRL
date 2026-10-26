@@ -10,7 +10,9 @@
 // Options:
 //   --out <dir>            output folder (default pack/<sample or file name>)
 //   --variant precision|clearance   tile/inserter/wall/belt variant (default precision)
+//   --printer <id>         bed size from src/data/printers.json (also caps the grid plates to the bed)
 //   --bed 256x256          bed size in mm (default 256x256), --gap 3 (mm between parts), --margin 3
+//   --scale 100            print scale in % for the 3MF plates (grid plates are capped accordingly)
 //   --endStyle none|short|long|medium  --inserterHand closed|open  --chests closed|open
 //   --items auto|none|<item>  --pad N  --no-fill  --no-grid  --compact
 //   --plates colour|colour-strict|part|mixed   how plates are grouped (default colour: one colour per
@@ -44,7 +46,16 @@ async function main() {
     process.exit(2);
   }
   const variant = val('variant', 'precision') === 'clearance' ? 'clearance' : 'precision';
-  const [bedW, bedH] = String(val('bed', '256x256')).split('x').map(Number);
+  const printers = JSON.parse(await fs.readFile(path.join(ROOT, 'src', 'data', 'printers.json'), 'utf8')).printers;
+  const printer = val('printer', null) ? printers.find((p) => p.id === val('printer')) : null;
+  if (val('printer', null) && !printer) {
+    console.error(`Unknown printer "${val('printer')}". Known: ${printers.map((p) => p.id).join(', ')}`);
+    process.exit(2);
+  }
+  const [bedW, bedH] = printer ? [printer.bedW, printer.bedH] : String(val('bed', '256x256')).split('x').map(Number);
+  const scale = Math.min(2, Math.max(0.25, (Number(val('scale', 100)) || 100) / 100));
+  const margin = Number(val('margin', 3));
+  const maxPlate = printer || args.includes('--bed') ? Math.max(1, Math.min(10, Math.floor((Math.min(bedW, bedH) - 2 * margin) / (25 * scale)))) : 10;
   const options = {
     ...DEFAULT_OPTIONS,
     endStyle: val('endStyle', DEFAULT_OPTIONS.endStyle),
@@ -55,6 +66,7 @@ async function main() {
     fillEmpty: !flag('no-fill'),
     includeGrid: !flag('no-grid'),
     compactPlates: flag('compact'),
+    maxPlate,
   };
 
   let text;
@@ -83,7 +95,7 @@ async function main() {
   const normalized = normalizeBlueprint(entry.blueprint);
   const detected = detectItems(normalized);
   const placements = buildPlacements(normalized, { ...options, detectedItem: detected.best });
-  const bom = buildBom(placements, { variant, mmPerTile: 25 });
+  const bom = buildBom(placements, { variant, mmPerTile: 25 * scale });
   const label = entry.label || name;
   const outDir = path.resolve(val('out', path.join('pack', name)));
   console.log(`Blueprint: ${label}${flat.length > 1 ? ` (entry ${entryIndex + 1} of ${flat.length})` : ''}`);
@@ -105,7 +117,8 @@ async function main() {
     bedW,
     bedH,
     gap: Number(val('gap', 3)),
-    margin: Number(val('margin', 3)),
+    margin,
+    scale,
     groupBy: val('plates', flag('mixed-plates') ? 'mixed' : flag('strict-colours') ? 'colour-strict' : 'colour'),
     includeStl: !flag('no-stl'),
     include3mf: !flag('no-3mf'),

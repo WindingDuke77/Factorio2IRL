@@ -95,6 +95,23 @@
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
+                  <label class="f-label" for="opt-printer">Printer</label>
+                  <select id="opt-printer" class="f-select"></select>
+                  <div id="opt-bed-custom" class="mt-1 flex items-center gap-1" style="display: none">
+                    <input id="opt-bed-w" class="f-input" type="number" min="50" max="1000" value="256" title="Bed width (mm)" />
+                    <span class="text-f-muted">×</span>
+                    <input id="opt-bed-h" class="f-input" type="number" min="50" max="1000" value="256" title="Bed depth (mm)" />
+                  </div>
+                  <div id="opt-printer-note" class="mt-1 text-xs text-f-muted"></div>
+                </div>
+                <div>
+                  <label class="f-label" for="opt-scale">Print scale (%)</label>
+                  <input id="opt-scale" class="f-input" type="number" min="25" max="200" step="5" value="100" />
+                  <div class="mt-1 text-xs text-f-muted">Fits are designed for 100%.</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
                   <label class="f-label" for="opt-endStyle">Belt ends</label>
                   <select id="opt-endStyle" class="f-select">
                     <option value="none">None (plain straight)</option>
@@ -270,7 +287,8 @@
               </div>
             </div>
           </div>
-          <p class="m-0 text-xs text-f-muted">Parts larger than the bed get a plate of their own and are marked in plates.txt.</p>
+          <p id="pack-note" class="m-0 text-xs text-f-muted"></p>
+          <p class="m-0 text-xs text-f-muted">Parts larger than the bed get a plate of their own and are marked in plates.txt. STL files are always at 100%; the scale applies to the 3MF plates.</p>
           <div class="flex items-center justify-end gap-2">
             <button id="pack-cancel" class="button button-small" type="button">Cancel</button>
             <button id="pack-go" class="button button-small" type="button">Download</button>

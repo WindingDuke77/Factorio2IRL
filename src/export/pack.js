@@ -18,6 +18,7 @@ export const PACK_DEFAULTS = {
   groupBy: 'colour',
   includeStl: true,
   include3mf: true,
+  scale: 1, // applied to the 3MF plates (STL copies stay at 100%)
 };
 
 export const shortSet = (setName) => setName.replace(/^Factorio\s+/i, '');
@@ -89,8 +90,8 @@ export async function buildPackEntries({ bom, placements, label, loadStl, deflat
         onProgress(`Reading ${r.filename}`);
         mesh = readStl(bytes);
         mesh.name = `${r.filename.replace(/\.stl$/i, '')} (${shortSet(r.set.setName)}${r.folder ? `, ${r.folder}` : ''})`;
-        mesh.w = mesh.max[0] - mesh.min[0];
-        mesh.d = mesh.max[1] - mesh.min[1];
+        mesh.w = (mesh.max[0] - mesh.min[0]) * o.scale;
+        mesh.d = (mesh.max[1] - mesh.min[1]) * o.scale;
         meshes.set(rel, mesh);
       }
       const colour = colours.get(r.key) ?? '#808080';
@@ -103,17 +104,17 @@ export async function buildPackEntries({ bom, placements, label, loadStl, deflat
       const plate = plates[i];
       const plateColours = [...new Set(plate.items.map((it) => it.colour))];
       const fileName = `plate-${String(i + 1).padStart(2, '0')}${plateColours.length === 1 ? `-${plateColours[0].slice(1)}` : '-mixed'}.3mf`;
-      entries.push({ name: `plates/${fileName}`, data: await build3mf(plate, `${label} - plate ${i + 1}`, deflate), store: true });
+      entries.push({ name: `plates/${fileName}`, data: await build3mf(plate, `${label} - plate ${i + 1}`, deflate, o.scale), store: true });
       const counts = new Map();
       for (const it of plate.items) counts.set(it.mesh.name, (counts.get(it.mesh.name) ?? 0) + 1);
       index.push(`${fileName}  (${plateColours.join(', ')})${plate.oversize ? '  LARGER THAN THE BED' : ''}\n${[...counts].map(([n, q]) => `    ${String(q).padStart(3)} x ${n}`).join('\n')}`);
     }
     const oversize = plates.filter((p) => p.oversize).length;
-    entries.push({ name: 'plates/plates.txt', data: `${o.bedW} x ${o.bedH} mm bed, ${o.gap} mm gap, plates by ${o.groupBy}${oversize ? `; ${oversize} part(s) larger than the bed are on plates of their own` : ''}\n\n${index.join('\n\n')}\n` });
+    entries.push({ name: 'plates/plates.txt', data: `${o.bedW} x ${o.bedH} mm bed, ${o.gap} mm gap, plates by ${o.groupBy}${o.scale !== 1 ? `, scale ${Math.round(o.scale * 100)}%` : ''}${oversize ? `; ${oversize} part(s) larger than the bed are on plates of their own` : ''}\n\n${index.join('\n\n')}\n` });
   }
   entries.push({
     name: 'README.txt',
-    data: `${label}\n\nstl/      one copy of every STL this blueprint needs; the number in front is how many to print.\nplates/   one 3MF per print plate with all instances arranged on a ${o.bedW} x ${o.bedH} mm bed, one colour per plate\n          (small colour groups share "mixed" plates). Open a plate in PrusaSlicer, Bambu Studio or OrcaSlicer, pick the filament, slice.\nparts.csv the parts list with Printables links.\n\nModels by Wube Software (CC BY-NC), https://www.printables.com/@WubeSoftware/models\n`,
+    data: `${label}\n\nstl/      one copy of every STL this blueprint needs; the number in front is how many to print.\nplates/   one 3MF per print plate with all instances arranged on a ${o.bedW} x ${o.bedH} mm bed${o.scale !== 1 ? ` at ${Math.round(o.scale * 100)}% scale (the STL files are at 100%)` : ''}, one colour per plate\n          (small colour groups share "mixed" plates). Open a plate in PrusaSlicer, Bambu Studio or OrcaSlicer, pick the filament, slice.\nparts.csv the parts list with Printables links.\n\nModels by Wube Software (CC BY-NC), https://www.printables.com/@WubeSoftware/models\n`,
   });
   return { entries, missing, plates, oversize: plates.filter((p) => p.oversize).length };
 }
@@ -183,7 +184,7 @@ export function arrange(instances, opts = {}) {
 
 // ---------------------------------------------------------------- 3MF
 /** A core-spec 3MF (zip) for one plate: objects per mesh+colour, build items per instance. */
-export async function build3mf(plate, title, deflate) {
+export async function build3mf(plate, title, deflate, scale = 1) {
   const colours = [...new Set(plate.items.map((it) => it.colour))];
   const objectIds = new Map();
   const resources = [`<basematerials id="1">${colours.map((c) => `<base name="${c}" displaycolor="${c}" />`).join('')}</basematerials>`];
@@ -197,7 +198,8 @@ export async function build3mf(plate, title, deflate) {
       resources.push(meshXml(id, it.mesh, colours.indexOf(it.colour)));
     }
     const m = it.mesh;
-    items.push(`<item objectid="${objectIds.get(k)}" transform="1 0 0 0 1 0 0 0 1 ${num(it.x - m.min[0])} ${num(it.y - m.min[1])} ${num(-m.min[2])}" />`);
+    const s = num(scale);
+    items.push(`<item objectid="${objectIds.get(k)}" transform="${s} 0 0 0 ${s} 0 0 0 ${s} ${num(it.x - m.min[0] * scale)} ${num(it.y - m.min[1] * scale)} ${num(-m.min[2] * scale)}" />`);
   }
   const model = `<?xml version="1.0" encoding="UTF-8"?>
 <model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">

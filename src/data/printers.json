@@ -1,0 +1,33 @@
+{
+  "about": "Printers offered in Print options. bedW x bedH are the usable bed sizes in mm (X x Y). Add your own entry with a unique id; the app caps the grid base plates to what fits the bed (25 mm per tile at 100% scale, 3 mm margins) and pre-fills the pack dialog with it.",
+  "printers": [
+    { "id": "bambu-a1-mini", "name": "Bambu Lab A1 mini", "bedW": 180, "bedH": 180 },
+    { "id": "bambu-a1", "name": "Bambu Lab A1", "bedW": 256, "bedH": 256 },
+    { "id": "bambu-p1", "name": "Bambu Lab P1P / P1S", "bedW": 256, "bedH": 256 },
+    { "id": "bambu-x1", "name": "Bambu Lab X1 / X1C / X1E", "bedW": 256, "bedH": 256 },
+    { "id": "bambu-h2d", "name": "Bambu Lab H2D", "bedW": 350, "bedH": 320 },
+    { "id": "prusa-mini", "name": "Prusa MINI+", "bedW": 180, "bedH": 180 },
+    { "id": "prusa-mk3s", "name": "Prusa i3 MK3S+", "bedW": 250, "bedH": 210 },
+    { "id": "prusa-mk4", "name": "Prusa MK4 / MK4S", "bedW": 250, "bedH": 210 },
+    { "id": "prusa-core-one", "name": "Prusa CORE One", "bedW": 250, "bedH": 220 },
+    { "id": "prusa-xl", "name": "Prusa XL", "bedW": 360, "bedH": 360 },
+    { "id": "creality-ender3", "name": "Creality Ender-3 / V2 / S1", "bedW": 220, "bedH": 220 },
+    { "id": "creality-ender3-v3", "name": "Creality Ender-3 V3 SE / KE", "bedW": 220, "bedH": 220 },
+    { "id": "creality-k1", "name": "Creality K1 / K1C", "bedW": 220, "bedH": 220 },
+    { "id": "creality-k1-max", "name": "Creality K1 Max", "bedW": 300, "bedH": 300 },
+    { "id": "creality-k2-plus", "name": "Creality K2 Plus", "bedW": 350, "bedH": 350 },
+    { "id": "elegoo-neptune-4", "name": "Elegoo Neptune 4 / 4 Pro", "bedW": 225, "bedH": 225 },
+    { "id": "elegoo-neptune-4-max", "name": "Elegoo Neptune 4 Max", "bedW": 420, "bedH": 420 },
+    { "id": "elegoo-centauri-carbon", "name": "Elegoo Centauri Carbon", "bedW": 256, "bedH": 256 },
+    { "id": "anycubic-kobra-2", "name": "Anycubic Kobra 2", "bedW": 220, "bedH": 220 },
+    { "id": "anycubic-kobra-3", "name": "Anycubic Kobra 3", "bedW": 250, "bedH": 250 },
+    { "id": "flashforge-ad5m", "name": "Flashforge Adventurer 5M / 5M Pro", "bedW": 220, "bedH": 220 },
+    { "id": "sovol-sv06", "name": "Sovol SV06", "bedW": 220, "bedH": 220 },
+    { "id": "sovol-sv08", "name": "Sovol SV08", "bedW": 350, "bedH": 350 },
+    { "id": "qidi-q1-pro", "name": "QIDI Q1 Pro", "bedW": 245, "bedH": 245 },
+    { "id": "qidi-x-plus-3", "name": "QIDI X-Plus 3", "bedW": 280, "bedH": 280 },
+    { "id": "voron-0", "name": "Voron 0", "bedW": 120, "bedH": 120 },
+    { "id": "voron-2.4-300", "name": "Voron 2.4 (300)", "bedW": 300, "bedH": 300 },
+    { "id": "voron-2.4-350", "name": "Voron 2.4 (350)", "bedW": 350, "bedH": 350 }
+  ]
+}

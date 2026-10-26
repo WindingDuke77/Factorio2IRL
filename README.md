@@ -79,6 +79,10 @@ npm run models        # = fetch-models + convert-models
 - Stacking heights come from the STLs: the grid plate is a 2 mm slab with a 1.5 mm rim, tiles
   (2 mm) drop into that pocket, shaped tiles have a 1 mm pocket the model base sits in, and the
   belt top rests on the 4.75 mm plateau inside its base, so the plus pegs slot into the plate.
+- Print options has a **Printer** list (`src/data/printers.json`, add your own) and a **Print scale**.
+  Picking a printer caps the grid base plates to what fits its bed (25 mm per tile at 100%, 3 mm
+  margins; a 180 mm bed gets plates up to 6×6) and pre-fills the Pack dialog's bed size. The scale
+  applies to the parts list's mm sizes, the plate cap and the 3MF plates; STL copies stay at 100%.
 - Belt ends are optional (default none): "short" puts the rounded cap on the free tile before/after
   the belt (with its End Short Tile), "long" uses the integrated end piece, "medium" the medium
   piece on its End Medium Tile.

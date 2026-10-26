@@ -70,3 +70,11 @@ test('compact tiling only plates occupied regions and counts seam pins per tile'
   assert.equal(pins, seamPins(plates));
   assert.equal(seamPins([{ x: 0, y: 0, w: 10, h: 4 }, { x: 10, y: 0, w: 3, h: 4 }]), 4);
 });
+
+test('plate size can be capped to a printer bed', () => {
+  assert.deepEqual(chunkLength(13, 4), [4, 4, 3, 2]);
+  assert.deepEqual(chunkLength(7, 7), [7]);
+  const { plates } = tilePlates({ minX: 0, minY: 0, w: 13, h: 9 }, 4);
+  assert.ok(plates.every((p) => p.w <= 4 && p.h <= 4), 'no plate larger than 4x4');
+  assert.equal(plates.reduce((a, p) => a + p.w * p.h, 0), 13 * 9);
+});

@@ -6,24 +6,26 @@ import { boundsOf } from './normalize.js';
 export const MAX_PLATE = 10;
 
 /**
- * Split a length into plate-sized chunks: as many 10s as possible, never leaving a
- * remainder of 1 when we can avoid it (only 1x1 plates exist with a side of 1).
+ * Split a length into plate-sized chunks: as many `max`-long plates as possible (10 is the
+ * largest Wube plate; a printer bed can cap it lower), never leaving a remainder of 1 when we
+ * can avoid it (only 1x1 plates exist with a side of 1).
  */
-export function chunkLength(len) {
+export function chunkLength(len, max = MAX_PLATE) {
+  max = Math.max(1, Math.min(MAX_PLATE, Math.floor(max)));
   if (len <= 0) return [];
-  if (len === 1) return [1];
+  if (len === 1 || max === 1) return Array(len).fill(1);
   const chunks = [];
   let remaining = len;
   while (remaining > 0) {
-    if (remaining <= MAX_PLATE) {
+    if (remaining <= max) {
       chunks.push(remaining);
       remaining = 0;
-    } else if (remaining - MAX_PLATE === 1) {
-      chunks.push(MAX_PLATE - 1);
-      remaining -= MAX_PLATE - 1;
+    } else if (remaining - max === 1 && max > 2) {
+      chunks.push(max - 1);
+      remaining -= max - 1;
     } else {
-      chunks.push(MAX_PLATE);
-      remaining -= MAX_PLATE;
+      chunks.push(max);
+      remaining -= max;
     }
   }
   return chunks;
@@ -38,13 +40,13 @@ export function plateKey(w, h) {
 }
 
 /**
- * Tile the bounding box with grid plates.
+ * Tile the bounding box with grid plates no larger than maxPlate x maxPlate.
  * @param {{minX:number,minY:number,w:number,h:number}} bounds
  * @returns {{ plates: Array<{key:string,x:number,y:number,w:number,h:number,rotated:boolean}>, pins: number }}
  */
-export function tilePlates(bounds) {
-  const cols = chunkLength(bounds.w);
-  const rows = chunkLength(bounds.h);
+export function tilePlates(bounds, maxPlate = MAX_PLATE) {
+  const cols = chunkLength(bounds.w, maxPlate);
+  const rows = chunkLength(bounds.h, maxPlate);
   const plates = [];
   let y = bounds.minY;
   for (const h of rows) {
@@ -76,7 +78,8 @@ function pushPlate(plates, x, y, w, h) {
  * @param {{minX:number,minY:number,maxX:number,maxY:number,w:number,h:number}} bounds
  * @param {Set<string>} occupied  cells as "x,y"
  */
-export function tilePlatesCompact(bounds, occupied) {
+export function tilePlatesCompact(bounds, occupied, maxPlate = MAX_PLATE) {
+  maxPlate = Math.max(1, Math.min(MAX_PLATE, Math.floor(maxPlate)));
   const has = (x, y) => occupied.has(`${x},${y}`);
   const signature = (y) => {
     let sig = '';
@@ -118,7 +121,7 @@ export function tilePlatesCompact(bounds, occupied) {
   for (let y = bounds.minY; y < bounds.maxY; y++) {
     const sig = signature(y);
     const last = bands[bands.length - 1];
-    if (last && last.sig === sig && last.y1 - last.y0 < MAX_PLATE) last.y1 = y + 1;
+    if (last && last.sig === sig && last.y1 - last.y0 < maxPlate) last.y1 = y + 1;
     else bands.push({ y0: y, y1: y + 1, sig });
   }
   let merged = true;
@@ -127,7 +130,7 @@ export function tilePlatesCompact(bounds, occupied) {
     for (let i = 0; i + 1 < bands.length; i++) {
       const p = bands[i];
       const q = bands[i + 1];
-      if (q.y1 - p.y0 > MAX_PLATE) continue;
+      if (q.y1 - p.y0 > maxPlate) continue;
       const thin = p.y1 - p.y0 < 2 || q.y1 - q.y0 < 2;
       if (thin || emptyFraction(p.y0, q.y1) <= 0.25) {
         bands.splice(i, 2, { y0: p.y0, y1: q.y1, sig: null });
@@ -150,7 +153,7 @@ export function tilePlatesCompact(bounds, occupied) {
         else if (ry0 > y0) ry0--;
       }
       let px = x;
-      for (const w of chunkLength(x1 - x)) {
+      for (const w of chunkLength(x1 - x, maxPlate)) {
         pushPlate(plates, px, ry0, w, ry1 - ry0);
         px += w;
       }

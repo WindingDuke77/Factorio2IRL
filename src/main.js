@@ -3,6 +3,7 @@ import { loadSaved, saveState, clearSaved } from './persist.js';
 import './style.css';
 import * as THREE from 'three';
 import samples from './data/samples.json' with { type: 'json' };
+import printersData from './data/printers.json' with { type: 'json' };
 import { decodeBlueprintString } from './blueprint/decode.js';
 import { flattenBook, normalizeBlueprint } from './blueprint/normalize.js';
 import { buildPlacements, DEFAULT_OPTIONS } from './blueprint/placements.js';
@@ -33,7 +34,12 @@ const state = {
   restoreSelected: null, // book entry to reselect after a reload
   restoreCamera: null, // camera to restore after a reload
   pack: { stl: true, mf: true, bed: '256x256', bedW: 256, bedH: 256, groupBy: 'colour', gap: 3, margin: 3 },
+  printer: 'any', // printers.json id, 'any' or 'custom'
+  bed: { w: 256, h: 256 }, // custom bed (mm)
+  scale: 100, // print scale (%)
 };
+const PRINTERS = printersData.printers;
+const BED_MARGIN = 3;
 let persistEnabled = false;
 
 const scene = createScene($('view'));
@@ -118,6 +124,22 @@ async function init() {
   bindOption('opt-includeGrid', 'includeGrid', (v, el) => el.checked);
   bindOption('opt-compactPlates', 'compactPlates', (v, el) => el.checked);
 
+  // Printer and scale: cap the grid plates to the bed and pre-fill the pack dialog.
+  {
+    const sel = $('opt-printer');
+    const add = (value, text) => {
+      const o = document.createElement('option');
+      o.value = value;
+      o.textContent = text;
+      sel.appendChild(o);
+    };
+    add('any', 'Any printer (plates up to 10×10)');
+    for (const p of PRINTERS) add(p.id, `${p.name} (${p.bedW} × ${p.bedH} mm)`);
+    add('custom', 'Custom bed…');
+    sel.addEventListener('change', () => applyPrinter());
+    for (const id of ['opt-bed-w', 'opt-bed-h', 'opt-scale']) $(id).addEventListener('change', () => applyPrinter());
+  }
+
   bindView('view-bodies', 'showBodies');
   bindView('view-tiles', 'showTiles');
   bindView('view-grid', 'showGrid');
@@ -189,6 +211,9 @@ function restoreSaved(saved) {
   state.variant = saved.variant === 'clearance' ? 'clearance' : 'precision';
   state.view = { ...state.view, ...(saved.view ?? {}) };
   state.pack = { ...state.pack, ...(saved.pack ?? {}) };
+  if (typeof saved.printer === 'string') state.printer = saved.printer;
+  if (saved.bed?.w && saved.bed?.h) state.bed = { w: saved.bed.w, h: saved.bed.h };
+  if (Number.isFinite(saved.scale)) state.scale = saved.scale;
   state.restoreSelected = Number.isInteger(saved.selected) ? saved.selected : null;
   state.restoreCamera = saved.camera ?? null;
   syncControls();
@@ -211,6 +236,15 @@ function syncControls() {
   $('view-tiles').checked = state.view.showTiles;
   $('view-grid').checked = state.view.showGrid;
   $('view-missing').checked = state.view.showMissing;
+  $('opt-printer').value = state.printer;
+  if ($('opt-printer').value !== state.printer) {
+    state.printer = 'any';
+    $('opt-printer').value = 'any';
+  }
+  $('opt-bed-w').value = String(state.bed.w);
+  $('opt-bed-h').value = String(state.bed.h);
+  $('opt-scale').value = String(state.scale);
+  derivePrinter();
 }
 
 let persistTimer = null;
@@ -228,6 +262,9 @@ function persist() {
       variant: state.variant,
       view: state.view,
       pack: state.pack,
+      printer: state.printer,
+      bed: state.bed,
+      scale: state.scale,
       camera: {
         pos: scene.camera.position.toArray(),
         target: scene.controls.target.toArray(),
@@ -322,9 +359,46 @@ function selectBlueprint(i) {
   persist();
 }
 
+/** Bed size (mm) of the selected printer, or null for "any". */
+function printerBed() {
+  if (state.printer === 'any') return null;
+  if (state.printer === 'custom') return { w: state.bed.w, h: state.bed.h };
+  const p = PRINTERS.find((x) => x.id === state.printer);
+  return p ? { w: p.bedW, h: p.bedH } : null;
+}
+/** Derive the plate cap and the pack bed from the printer and scale (no rebuild). */
+function derivePrinter() {
+  const bed = printerBed();
+  const tileMm = (state.mmPerTile * state.scale) / 100;
+  state.options.maxPlate = bed ? Math.max(1, Math.min(10, Math.floor((Math.min(bed.w, bed.h) - 2 * BED_MARGIN) / tileMm))) : 10;
+  if (bed) {
+    state.pack.bedW = bed.w;
+    state.pack.bedH = bed.h;
+    const preset = `${bed.w}x${bed.h}`;
+    state.pack.bed = [...$('pack-bed').options].some((o) => o.value === preset) ? preset : 'custom';
+  }
+  $('opt-bed-custom').style.display = state.printer === 'custom' ? '' : 'none';
+  const n = state.options.maxPlate;
+  $('opt-printer-note').textContent = bed
+    ? `Grid plates up to ${n}×${n} tiles (${Math.round(n * tileMm)} mm) on a ${bed.w} × ${bed.h} mm bed.`
+    : 'Grid plates up to 10×10 tiles (250 mm at 100%).';
+}
+function applyPrinter() {
+  const clamp = (v, lo, hi, dflt) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt);
+  state.printer = $('opt-printer').value;
+  state.bed = { w: clamp(Number($('opt-bed-w').value), 50, 1000, 256), h: clamp(Number($('opt-bed-h').value), 50, 1000, 256) };
+  state.scale = clamp(Number($('opt-scale').value), 25, 200, 100);
+  $('opt-scale').value = String(state.scale);
+  derivePrinter();
+  rebuild();
+  persist();
+}
+
 function openPackDialog() {
   if (!state.bom || !state.placements) return;
   const p = state.pack;
+  const bed = printerBed();
+  $('pack-note').textContent = `${bed ? `Bed pre-filled from the printer (${bed.w} × ${bed.h} mm). ` : ''}Scale ${state.scale}% (change it in Print options).`;
   $('pack-stl').checked = p.stl;
   $('pack-3mf').checked = p.mf;
   $('pack-bed').value = p.bed;
@@ -408,6 +482,7 @@ async function buildPackZip(onProgress = () => {}) {
     gap: p.gap,
     margin: p.margin,
     groupBy: p.groupBy,
+    scale: state.scale / 100,
   });
   onProgress('Zipping…');
   const bytes = await buildZip(entries, deflateRawBrowser);
@@ -426,7 +501,7 @@ function rebuild({ sceneToo = true, frame = false } = {}) {
   if (!state.normalized) return;
   state.detected = detectItems(state.normalized);
   state.placements = buildPlacements(state.normalized, { ...state.options, detectedItem: state.detected.best });
-  state.bom = buildBom(state.placements, { variant: state.variant, mmPerTile: state.mmPerTile });
+  state.bom = buildBom(state.placements, { variant: state.variant, mmPerTile: (state.mmPerTile * state.scale) / 100 });
   renderBomPanel({ bom: state.bom, label: currentLabel(), missingKeys: state.missingKeys });
   renderHeaderStats({ bom: state.bom, entities: state.normalized.entities.length });
   if (sceneToo) rebuildScene(frame);
