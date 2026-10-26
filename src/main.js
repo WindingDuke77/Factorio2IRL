@@ -261,18 +261,13 @@ function persist() {
   persistTimer = setTimeout(() => {
     const prev = loadSaved() ?? {};
     const text = $('bp-input').value;
-    const blueprint =
-      persistBlueprint && text.trim()
-        ? {
-            text,
-            selected: state.selected,
-            camera: {
-              pos: scene.camera.position.toArray(),
-              target: scene.controls.target.toArray(),
-              bounds: state.placements ? { minX: state.placements.bounds.minX, minY: state.placements.bounds.minY, w: state.placements.bounds.w, h: state.placements.bounds.h } : null,
-            },
-          }
-        : {};
+    const camera = {
+      pos: scene.camera.position.toArray(),
+      target: scene.controls.target.toArray(),
+      bounds: state.placements ? { minX: state.placements.bounds.minX, minY: state.placements.bounds.minY, w: state.placements.bounds.w, h: state.placements.bounds.h } : null,
+      label: currentLabel(),
+    };
+    const blueprint = persistBlueprint ? (text.trim() ? { text, selected: state.selected, camera } : {}) : { devCamera: camera };
     saveState({
       ...prev,
       defaultsVersion: 2,
@@ -535,11 +530,13 @@ async function rebuildScene(frame = false) {
   state.missingKeys = missingKeys;
   scene.setContent(group, state.placements.bounds);
   if (frame) {
-    const restore = state.restoreCamera;
+    const saved = loadSaved();
+    const restore = state.restoreCamera ?? (persistBlueprint ? saved?.camera : saved?.devCamera) ?? null;
     state.restoreCamera = null;
     const b = state.placements.bounds;
     const sameFootprint = restore?.bounds && ['minX', 'minY', 'w', 'h'].every((k) => restore.bounds[k] === b[k]);
-    scene.frame(b, new URLSearchParams(location.search).get('view') || 'iso', sameFootprint ? restore : null);
+    const sameScene = sameFootprint && (persistBlueprint || restore.label === currentLabel());
+    scene.frame(b, new URLSearchParams(location.search).get('view') || 'iso', sameScene ? restore : null);
   }
   $('view-loading').classList.add('hidden');
   $('view-empty').classList.add('hidden');
