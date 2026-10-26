@@ -23,7 +23,8 @@ npm run dev
 ```
 
 Then open http://localhost:5173, paste a blueprint string (or load a sample) and press
-**Render**. `npm run build` writes a static site to `dist/`.
+**Render**. The blueprint, the selected book entry, the print and view options and the camera are
+kept in the browser's local storage, so a reload comes back to the same view (Clear forgets them). `npm run build` writes a static site to `dist/`.
 
 `?gallery` shows every converted piece laid out for inspection; `?gallery=belt/&view=top` filters
 by key prefix and picks a camera (`iso`, `top`, `front`, `bottom`). `?dev` ("Model check" in the
@@ -55,7 +56,9 @@ npm run models        # = fetch-models + convert-models
 - One Factorio tile is **25 mm** (the grid plates are exactly 25 mm × N); the shaped tiles are
   23.9 mm so they drop into the plates.
 - Every belt tile is a *Bottom* (base with rollers) plus a *Top* (chevron surface), snapped into a
-  shaped *Tile*, which pins into a *Grid* base plate. The parts list counts one Grid PIN per plate and one Splitter Pin print (the file holds the pair) per splitter.
+  shaped *Tile*, which pins into a *Grid* base plate. The parts list counts one Grid PIN for every tile along a seam between two plates, and one Splitter Pin
+  print (the file holds the pair) per splitter. "Compact plates" puts plates (and Empty Tiles) only where
+  cells are occupied instead of filling the whole rectangle.
   The 3D view draws the same stack: grid plate, tiles (shaped ones under models, Empty Tiles
   elsewhere), models on top. Tiles can be hidden with the "Show tiles" toggle.
 - Three STLs are print plates of loose parts, split into connected components by `convert-models`
@@ -117,6 +120,11 @@ photos:
 - it faces the right way for direction north (`rotation`), and belts/hoods face their neighbours
   once rotated (check in `&d=4` too);
 - it lies the right way up (`tilt`) and is centred on its tile (`offset.x`/`offset.z`).
+
+## Slicer export
+
+See [docs/slicer-export.md](docs/slicer-export.md) for the proposed export improvements (file
+lists with links, STL packs, 3MF projects, print batches).
 
 ## Project layout
 

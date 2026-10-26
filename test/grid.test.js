@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chunkLength, tilePlates, plateKey } from '../src/blueprint/grid.js';
+import { chunkLength, tilePlates, plateKey, tilePlatesCompact, seamPins } from '../src/blueprint/grid.js';
 import { normalizeBlueprint } from '../src/blueprint/normalize.js';
 import { buildPlacements } from '../src/blueprint/placements.js';
 
@@ -24,7 +24,7 @@ test('tilePlates covers the whole footprint', () => {
   const area = plates.reduce((a, p) => a + p.w * p.h, 0);
   assert.equal(area, 13 * 4);
   assert.equal(plates.length, 2);
-  assert.equal(pins, 2, 'one Grid PIN per plate');
+  assert.equal(pins, 4, 'one Grid PIN per tile along the shared edge');
 });
 
 test('placements produce bodies, tiles, empty tiles and plates', () => {
@@ -54,4 +54,19 @@ test('placements produce bodies, tiles, empty tiles and plates', () => {
   assert.equal(keys.filter((k) => k === "tile/empty").length, 20);
   assert.equal(pl.pieces.filter((p) => p.group === 'grid').length, 1);
   assert.equal(pl.pieces.find((p) => p.group === 'grid').key, 'grid/5x6');
+});
+
+test('compact tiling only plates occupied regions and counts seam pins per tile', () => {
+  // An L: a 12x3 bar along the top and a 3x9 bar down the left, inside a 12x12 box.
+  const occ = new Set();
+  for (let x = 0; x < 12; x++) for (let y = 0; y < 3; y++) occ.add(`${x},${y}`);
+  for (let x = 0; x < 3; x++) for (let y = 3; y < 12; y++) occ.add(`${x},${y}`);
+  const { plates, pins } = tilePlatesCompact({ minX: 0, minY: 0, maxX: 12, maxY: 12, w: 12, h: 12 }, occ);
+  const area = plates.reduce((a, p) => a + p.w * p.h, 0);
+  assert.ok(area < 144, 'does not cover the empty quadrant');
+  const covers = (x, y) => plates.some((p) => x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h);
+  for (const [x, y] of [[11, 0], [0, 11], [2, 5]]) assert.ok(covers(x, y), `covers ${x},${y}`);
+  assert.ok(!covers(8, 8), 'no plate at 8,8');
+  assert.equal(pins, seamPins(plates));
+  assert.equal(seamPins([{ x: 0, y: 0, w: 10, h: 4 }, { x: 10, y: 0, w: 3, h: 4 }]), 4);
 });

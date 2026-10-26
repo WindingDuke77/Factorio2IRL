@@ -78,13 +78,13 @@ export function createScene(canvas) {
     if (bounds) setGrid(bounds);
   }
 
-  function frame(bounds, view = 'iso') {
+  function frame(bounds, view = 'iso', restore = null) {
     // The canvas may not be laid out yet on first load; wait for a real size before fitting.
     const el = canvas.parentElement ?? canvas;
     const cw = el.clientWidth;
     const chh = el.clientHeight;
     if (!cw || !chh) {
-      requestAnimationFrame(() => frame(bounds, view));
+      requestAnimationFrame(() => frame(bounds, view, restore));
       return;
     }
     resize();
@@ -95,7 +95,10 @@ export function createScene(canvas) {
     const hFov = Math.atan(Math.tan(vFov) * Math.min(Math.max(cw / chh, 0.5), 3));
     const dist = Math.max(radius / Math.tan(vFov), radius / Math.tan(hFov));
     controls.target.set(0, 0.4, 0);
-    if (view === 'top') {
+    if (restore?.pos && restore?.target) {
+      camera.position.fromArray(restore.pos);
+      controls.target.fromArray(restore.target);
+    } else if (view === 'top') {
       // Straight down with north (−Z) at the top of the screen.
       camera.position.set(0, dist, 0.0001);
     } else if (view === 'front') {

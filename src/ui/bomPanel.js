@@ -37,13 +37,6 @@ export function renderBomPanel({ bom, label, missingKeys = [] }) {
   const body = $('bom-body');
   body.innerHTML = '';
 
-  const intro = document.createElement('div');
-  intro.className = 'f-note';
-  intro.innerHTML = `Print the <b>High ${bom.variant === 'precision' ? 'Precision' : 'Clearance'}</b> versions. Footprint ${bom.bounds.w} × ${bom.bounds.h} tiles${
-    bom.physical ? ` (~${Math.round(bom.physical.wMm)} × ${Math.round(bom.physical.hMm)} mm)` : ''
-  }. Pin counts are estimates.`;
-  body.appendChild(intro);
-
   if (!bom.sets.length) {
     const p = document.createElement('p');
     p.className = 'text-f-muted';

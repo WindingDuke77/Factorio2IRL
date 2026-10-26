@@ -8,7 +8,7 @@
 
 import { resolveBeltShapes, buildCellMap } from './belts.js';
 import { resolveWallShapes } from './walls.js';
-import { footprintBounds, tilePlates } from './grid.js';
+import { footprintBounds, tilePlates, tilePlatesCompact } from './grid.js';
 import { DIR_VEC, rotateDirCW } from './normalize.js';
 import { BELT_ITEMS, ITEM_ORDER } from './items.js';
 
@@ -17,6 +17,7 @@ export const DEFAULT_OPTIONS = Object.freeze({
   inserterHand: 'closed', // 'closed' | 'open'
   fillEmpty: true, // put an Empty Tile on every uncovered cell inside the footprint
   includeGrid: true, // add grid base plates + pins
+  compactPlates: false, // plates (and empty tiles) only where cells are occupied, not the whole rectangle
   chestsOpen: false, // draw chests with the lid off / propped open
   beltItems: 'auto', // 'none' | 'auto' | 'mixed' | an id from BELT_ITEMS
   detectedItem: null, // item id found in the blueprint (used when beltItems === 'auto')
@@ -175,20 +176,22 @@ export function buildPlacements(normalized, options = {}) {
   for (const s of wallShapes.values()) if (popcount(s.mask) >= 2 && s.mask !== 5 && s.mask !== 10) fillIns++;
   if (fillIns) pieces.push({ key: 'wall/fill-in', x: bounds.minX, y: bounds.minY, rotation: 0, color: PIN_COLOR, entityId: null, group: 'hardware', qty: fillIns });
 
-  // Empty tiles for every uncovered cell inside the footprint.
+  // Grid base plates: the whole footprint rectangle, or (compact) only where cells are occupied.
+  let grid = { plates: [], pins: 0 };
+  if (bounds.w > 0) grid = opt.compactPlates ? tilePlatesCompact(bounds, covered) : tilePlates(bounds);
+  const inPlate = (x, y) => !opt.compactPlates || grid.plates.some((p) => x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h);
+
+  // Empty tiles for every uncovered cell inside the footprint (inside a plate when compact).
   if (opt.fillEmpty && bounds.w > 0) {
     for (let x = bounds.minX; x < bounds.maxX; x++) {
       for (let y = bounds.minY; y < bounds.maxY; y++) {
-        if (covered.has(`${x},${y}`)) continue;
+        if (covered.has(`${x},${y}`) || !inPlate(x, y)) continue;
         pieces.push({ key: 'tile/empty', x: x + 0.5, y: y + 0.5, rotation: 0, color: 0x6f6f6f, entityId: null, group: 'tile' });
       }
     }
   }
 
-  // Grid base plates.
-  let grid = { plates: [], pins: 0 };
   if (opt.includeGrid && bounds.w > 0) {
-    grid = tilePlates(bounds);
     for (const p of grid.plates) {
       pieces.push({
         key: p.key,

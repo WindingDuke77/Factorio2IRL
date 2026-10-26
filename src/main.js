@@ -1,4 +1,5 @@
 import { PARTS, COMPOSITES, LEVELS } from './render/orientation.js';
+import { loadSaved, saveState, clearSaved } from './persist.js';
 import './style.css';
 import * as THREE from 'three';
 import samples from './data/samples.json' with { type: 'json' };
@@ -29,7 +30,10 @@ const state = {
   mmPerTile: 25,
   missingKeys: [],
   buildToken: 0,
+  restoreSelected: null, // book entry to reselect after a reload
+  restoreCamera: null, // camera to restore after a reload
 };
+let persistEnabled = false;
 
 const scene = createScene($('view'));
 // Debug handle (used by the dev tooling and browser console).
@@ -93,6 +97,7 @@ async function init() {
   $('btn-clear').addEventListener('click', () => {
     $('bp-input').value = '';
     hideError();
+    clearSaved();
   });
 
   // Options
@@ -100,6 +105,7 @@ async function init() {
     radio.addEventListener('change', () => {
       state.variant = radio.value;
       rebuild({ sceneToo: false });
+      persist();
     });
   }
   bindOption('opt-endStyle', 'endStyle', (v) => v);
@@ -109,6 +115,7 @@ async function init() {
   bindOption('opt-pad', 'pad', (v) => Math.max(0, Math.min(10, Number(v) || 0)));
   bindOption('opt-fillEmpty', 'fillEmpty', (v, el) => el.checked);
   bindOption('opt-includeGrid', 'includeGrid', (v, el) => el.checked);
+  bindOption('opt-compactPlates', 'compactPlates', (v, el) => el.checked);
 
   bindView('view-bodies', 'showBodies');
   bindView('view-tiles', 'showTiles');
@@ -153,7 +160,60 @@ async function init() {
   } else if (params.get('sample')) {
     sel.value = params.get('sample');
     loadSample(params.get('sample'));
+  } else {
+    const saved = loadSaved();
+    if (saved?.text) restoreSaved(saved);
   }
+  persistEnabled = !params.has('dev') && !params.has('gallery');
+  scene.controls.addEventListener('change', persist);
+}
+
+/** Put the saved options back into the controls and render the saved blueprint. */
+function restoreSaved(saved) {
+  state.options = { ...DEFAULT_OPTIONS, ...(saved.options ?? {}) };
+  state.variant = saved.variant === 'clearance' ? 'clearance' : 'precision';
+  state.view = { ...state.view, ...(saved.view ?? {}) };
+  state.restoreSelected = Number.isInteger(saved.selected) ? saved.selected : null;
+  state.restoreCamera = saved.camera ?? null;
+  syncControls();
+  $('bp-input').value = saved.text;
+  renderFromText(saved.text);
+}
+
+function syncControls() {
+  const o = state.options;
+  $('opt-endStyle').value = o.endStyle;
+  $('opt-inserterHand').value = o.inserterHand;
+  $('opt-beltItems').value = o.beltItems;
+  $('opt-chests').value = o.chestsOpen ? 'open' : 'closed';
+  $('opt-pad').value = String(o.pad ?? 0);
+  $('opt-fillEmpty').checked = Boolean(o.fillEmpty);
+  $('opt-includeGrid').checked = Boolean(o.includeGrid);
+  $('opt-compactPlates').checked = Boolean(o.compactPlates);
+  for (const r of document.querySelectorAll('input[name="variant"]')) r.checked = r.value === state.variant;
+  $('view-bodies').checked = state.view.showBodies;
+  $('view-tiles').checked = state.view.showTiles;
+  $('view-grid').checked = state.view.showGrid;
+  $('view-missing').checked = state.view.showMissing;
+}
+
+let persistTimer = null;
+/** Save the blueprint, options, selection and camera (debounced; not in dev/gallery mode). */
+function persist() {
+  if (!persistEnabled) return;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    const text = $('bp-input').value;
+    if (!text.trim()) return;
+    saveState({
+      text,
+      selected: state.selected,
+      options: state.options,
+      variant: state.variant,
+      view: state.view,
+      camera: { pos: scene.camera.position.toArray(), target: scene.controls.target.toArray() },
+    });
+  }, 400);
 }
 
 function bindOption(id, key, parse) {
@@ -161,6 +221,7 @@ function bindOption(id, key, parse) {
   el.addEventListener('change', () => {
     state.options[key] = parse(el.value, el);
     rebuild();
+    persist();
   });
 }
 function bindView(id, key) {
@@ -168,6 +229,7 @@ function bindView(id, key) {
   el.addEventListener('change', () => {
     state.view[key] = el.checked;
     rebuildScene();
+    persist();
   });
 }
 
@@ -193,7 +255,11 @@ async function renderFromText(text) {
     return;
   }
   renderBookList();
-  const start = state.flat.findIndex((f) => f.active);
+  let start = state.flat.findIndex((f) => f.active);
+  if (state.restoreSelected != null) {
+    if (state.restoreSelected < state.flat.length) start = state.restoreSelected;
+    state.restoreSelected = null;
+  }
   selectBlueprint(start >= 0 ? start : 0);
 }
 
@@ -232,6 +298,7 @@ function selectBlueprint(i) {
   state.normalized = normalizeBlueprint(entry.blueprint);
   $('view-title').textContent = entry.label || '3D view';
   rebuild({ frame: true });
+  persist();
 }
 
 function currentLabel() {
@@ -261,7 +328,11 @@ async function rebuildScene(frame = false) {
   state.group = group;
   state.missingKeys = missingKeys;
   scene.setContent(group, state.placements.bounds);
-  if (frame) scene.frame(state.placements.bounds, new URLSearchParams(location.search).get('view') || 'iso');
+  if (frame) {
+    const restore = state.restoreCamera;
+    state.restoreCamera = null;
+    scene.frame(state.placements.bounds, new URLSearchParams(location.search).get('view') || 'iso', restore);
+  }
   $('view-loading').classList.add('hidden');
   $('view-empty').classList.add('hidden');
   renderNotes();
