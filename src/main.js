@@ -37,7 +37,7 @@ let persistEnabled = false;
 
 const scene = createScene($('view'));
 // Debug handle (used by the dev tooling and browser console).
-window.__f2i = { state, scene, THREE, rebuild: () => rebuildScene(false), PARTS, COMPOSITES, LEVELS };
+window.__f2i = { state, scene, THREE, rebuild: () => rebuildScene(false), PARTS, COMPOSITES, LEVELS, buildPackZip: (p) => buildPackZip(p) };
 
 // ---------------------------------------------------------------------------
 // Piece gallery (?gallery) — every converted model laid out for inspection.
@@ -140,6 +140,7 @@ async function init() {
       window.prompt('Copy the parts list:', text);
     }
   });
+  $('btn-download-pack').addEventListener('click', () => downloadPack());
   $('btn-download-csv').addEventListener('click', () => {
     if (!state.bom) return;
     const blob = new Blob([bomToCsv(state.bom)], { type: 'text/csv' });
@@ -303,6 +304,42 @@ function selectBlueprint(i) {
   $('view-title').textContent = entry.label || '3D view';
   rebuild({ frame: true });
   persist();
+}
+
+/** Zip of every needed STL, the parts list and 3MF print plates, built in the browser. */
+async function downloadPack() {
+  if (!state.bom || !state.placements) return;
+  const btn = $('btn-download-pack');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  hideError();
+  try {
+    const bytes = await buildPackZip((msg) => (btn.textContent = msg));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
+    a.download = `${slug(currentLabel() || 'blueprint')}-pack.zip`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  } catch (err) {
+    showError(`Could not build the pack: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Pack';
+  }
+}
+async function buildPackZip(onProgress = () => {}) {
+  const { buildPackEntries, buildZip, deflateRawBrowser, stlRelPath } = await import('./export/pack.js');
+  const base = import.meta.env.BASE_URL;
+  const loadStl = async (row) => {
+    const url = `${base}stl/${stlRelPath(row).split('/').map(encodeURIComponent).join('/')}`;
+    const r = await fetch(url);
+    return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
+  };
+  const { entries, missing } = await buildPackEntries({ bom: state.bom, placements: state.placements, label: currentLabel() || 'blueprint', loadStl, deflate: deflateRawBrowser, onProgress });
+  onProgress('Zipping…');
+  const bytes = await buildZip(entries, deflateRawBrowser);
+  if (missing.length) showError(`${missing.length} STL file(s) are not available on this server, so they are missing from the pack: ${missing.map((r) => r.filename).slice(0, 6).join(', ')}${missing.length > 6 ? '…' : ''}`);
+  return bytes;
 }
 
 function currentLabel() {

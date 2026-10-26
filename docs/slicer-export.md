@@ -18,7 +18,7 @@ needed STL named `<qty>x <set> - <file>.stl`, plus `parts.csv`, `parts.txt` and 
 print options are flags (`--variant`, `--endStyle`, `--inserterHand`, `--chests`, `--items`,
 `--pad`, `--no-fill`, `--no-grid`, `--compact`). Files stay on your machine.
 
-## 3. 3MF project export — done (same command)
+## 3. 3MF project export — done (same command, and the **Pack** button in the app)
 
 The same run writes `pack/<name>/plates/plate-NN-<colour>.3mf`: every instance arranged on a
 bed (`--bed 256x256`, `--gap 3`, `--margin 3`), one colour per plate (`--mixed-plates` to pack

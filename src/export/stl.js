@@ -1,29 +1,36 @@
-// Minimal STL reader shared by the pack script: binary or ASCII -> indexed mesh (mm).
+// STL reader usable in the browser and in node: binary or ASCII bytes -> indexed mesh (mm).
 
-/** @returns {{ vertices: Float64Array, triangles: Uint32Array, min: number[], max: number[] }} */
-export function readStl(buf) {
-  const tris = isAscii(buf) ? parseAscii(buf.toString('latin1')) : parseBinary(buf);
+/**
+ * @param {Uint8Array|ArrayBuffer} input
+ * @returns {{ vertices: Float64Array, triangles: Uint32Array, min: number[], max: number[] }}
+ */
+export function readStl(input) {
+  const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
+  const tris = isAscii(bytes) ? parseAscii(bytes) : parseBinary(bytes);
   return index(tris);
 }
 
-function isAscii(buf) {
-  if (buf.length < 84) return true;
-  if (buf.toString('latin1', 0, 5) !== 'solid') return false;
-  const n = buf.readUInt32LE(80);
-  return buf.length !== 84 + n * 50;
+function isAscii(bytes) {
+  if (bytes.length < 84) return true;
+  const head = String.fromCharCode(...bytes.subarray(0, 5));
+  if (head !== 'solid') return false;
+  const n = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(80, true);
+  return bytes.length !== 84 + n * 50;
 }
 
-function parseBinary(buf) {
-  const n = buf.readUInt32LE(80);
+function parseBinary(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const n = view.getUint32(80, true);
   const out = new Float64Array(n * 9);
   for (let i = 0; i < n; i++) {
     const o = 84 + i * 50 + 12;
-    for (let k = 0; k < 9; k++) out[i * 9 + k] = buf.readFloatLE(o + k * 4);
+    for (let k = 0; k < 9; k++) out[i * 9 + k] = view.getFloat32(o + k * 4, true);
   }
   return out;
 }
 
-function parseAscii(text) {
+function parseAscii(bytes) {
+  const text = new TextDecoder('latin1').decode(bytes);
   const nums = [];
   const re = /vertex\s+([-+\d.eE]+)\s+([-+\d.eE]+)\s+([-+\d.eE]+)/g;
   let m;
