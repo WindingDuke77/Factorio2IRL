@@ -96,7 +96,8 @@
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="f-label" for="opt-printer">Printer</label>
-                  <select id="opt-printer" class="f-select"></select>
+                  <input id="opt-printer" class="f-input" list="printer-list" placeholder="Type to search… (empty = any printer)" autocomplete="off" />
+                  <datalist id="printer-list"></datalist>
                   <div id="opt-bed-custom" class="mt-1 flex items-center gap-1" style="display: none">
                     <input id="opt-bed-w" class="f-input" type="number" min="50" max="1000" value="256" title="Bed width (mm)" />
                     <span class="text-f-muted">×</span>
@@ -114,10 +115,10 @@
                 <div>
                   <label class="f-label" for="opt-endStyle">Belt ends</label>
                   <select id="opt-endStyle" class="f-select">
-                    <option value="none">None (plain straight)</option>
+                    <option value="long" selected>Long end piece</option>
                     <option value="short">Short cap on the next tile</option>
-                    <option value="long">Long end piece</option>
                     <option value="medium">Medium piece</option>
+                    <option value="none">None (plain straight)</option>
                   </select>
                 </div>
                 <div>

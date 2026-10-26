@@ -13,7 +13,7 @@ import { DIR_VEC, rotateDirCW } from './normalize.js';
 import { BELT_ITEMS, ITEM_ORDER } from './items.js';
 
 export const DEFAULT_OPTIONS = Object.freeze({
-  endStyle: 'none', // 'none' | 'short' (cap on the next tile) | 'long' (integrated piece) | 'medium' (medium piece + cap)
+  endStyle: 'long', // 'long' (integrated end piece) | 'short' (cap on the next tile) | 'medium' (medium piece) | 'none'
   inserterHand: 'closed', // 'closed' | 'open'
   fillEmpty: true, // put an Empty Tile on every uncovered cell inside the footprint
   includeGrid: true, // add grid base plates + pins

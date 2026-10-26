@@ -126,17 +126,16 @@ async function init() {
 
   // Printer and scale: cap the grid plates to the bed and pre-fill the pack dialog.
   {
-    const sel = $('opt-printer');
-    const add = (value, text) => {
+    const list = $('printer-list');
+    const add = (value, label) => {
       const o = document.createElement('option');
       o.value = value;
-      o.textContent = text;
-      sel.appendChild(o);
+      o.label = label;
+      list.appendChild(o);
     };
-    add('any', 'Any printer (plates up to 10×10)');
-    for (const p of PRINTERS) add(p.id, `${p.name} (${p.bedW} × ${p.bedH} mm)`);
-    add('custom', 'Custom bed…');
-    sel.addEventListener('change', () => applyPrinter());
+    for (const p of PRINTERS) add(p.name, `${p.bedW} × ${p.bedH} mm`);
+    add('Custom bed', 'set width × depth below');
+    $('opt-printer').addEventListener('change', () => applyPrinter());
     for (const id of ['opt-bed-w', 'opt-bed-h', 'opt-scale']) $(id).addEventListener('change', () => applyPrinter());
   }
 
@@ -207,6 +206,8 @@ async function init() {
 
 /** Put the saved options back into the controls and render the saved blueprint. */
 function restoreSaved(saved) {
+  // Defaults that changed since the state was saved: belt ends became "long" (v2).
+  if ((saved.defaultsVersion ?? 1) < 2 && saved.options?.endStyle === 'none') saved.options.endStyle = 'long';
   state.options = { ...DEFAULT_OPTIONS, ...(saved.options ?? {}) };
   state.variant = saved.variant === 'clearance' ? 'clearance' : 'precision';
   state.view = { ...state.view, ...(saved.view ?? {}) };
@@ -236,11 +237,8 @@ function syncControls() {
   $('view-tiles').checked = state.view.showTiles;
   $('view-grid').checked = state.view.showGrid;
   $('view-missing').checked = state.view.showMissing;
-  $('opt-printer').value = state.printer;
-  if ($('opt-printer').value !== state.printer) {
-    state.printer = 'any';
-    $('opt-printer').value = 'any';
-  }
+  if (state.printer !== 'any' && state.printer !== 'custom' && !PRINTERS.some((p) => p.id === state.printer)) state.printer = 'any';
+  $('opt-printer').value = printerText();
   $('opt-bed-w').value = String(state.bed.w);
   $('opt-bed-h').value = String(state.bed.h);
   $('opt-scale').value = String(state.scale);
@@ -256,6 +254,7 @@ function persist() {
     const text = $('bp-input').value;
     if (!text.trim()) return;
     saveState({
+      defaultsVersion: 2,
       text,
       selected: state.selected,
       options: state.options,
@@ -359,6 +358,23 @@ function selectBlueprint(i) {
   persist();
 }
 
+/** Map the printer box text to a printers.json id, 'any' (empty) or 'custom' (unknown name). */
+function resolvePrinter(text) {
+  const t = text.trim().toLowerCase();
+  if (!t) return 'any';
+  if (t.startsWith('custom')) return 'custom';
+  const exact = PRINTERS.find((p) => p.name.toLowerCase() === t || p.id === t);
+  if (exact) return exact.id;
+  const partial = PRINTERS.filter((p) => p.name.toLowerCase().includes(t));
+  return partial.length ? partial[0].id : 'custom';
+}
+function printerText() {
+  if (state.printer === 'any') return '';
+  const p = PRINTERS.find((x) => x.id === state.printer);
+  if (p) return p.name;
+  const typed = $('opt-printer').value.trim();
+  return typed && resolvePrinter(typed) === 'custom' ? typed : 'Custom bed';
+}
 /** Bed size (mm) of the selected printer, or null for "any". */
 function printerBed() {
   if (state.printer === 'any') return null;
@@ -379,13 +395,15 @@ function derivePrinter() {
   }
   $('opt-bed-custom').style.display = state.printer === 'custom' ? '' : 'none';
   const n = state.options.maxPlate;
+  const known = state.printer === 'any' || PRINTERS.some((p) => p.id === state.printer);
   $('opt-printer-note').textContent = bed
-    ? `Grid plates up to ${n}×${n} tiles (${Math.round(n * tileMm)} mm) on a ${bed.w} × ${bed.h} mm bed.`
-    : 'Grid plates up to 10×10 tiles (250 mm at 100%).';
+    ? `${known ? '' : 'Not in the list, set the bed size. '}Grid plates up to ${n}×${n} tiles (${Math.round(n * tileMm)} mm) on a ${bed.w} × ${bed.h} mm bed.`
+    : 'Any printer: grid plates up to 10×10 tiles (250 mm at 100%).';
 }
 function applyPrinter() {
   const clamp = (v, lo, hi, dflt) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt);
-  state.printer = $('opt-printer').value;
+  state.printer = resolvePrinter($('opt-printer').value);
+  if (state.printer !== 'custom') $('opt-printer').value = printerText();
   state.bed = { w: clamp(Number($('opt-bed-w').value), 50, 1000, 256), h: clamp(Number($('opt-bed-h').value), 50, 1000, 256) };
   state.scale = clamp(Number($('opt-scale').value), 25, 200, 100);
   $('opt-scale').value = String(state.scale);
