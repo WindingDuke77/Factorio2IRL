@@ -1,9 +1,9 @@
 // Pack what a blueprint needs for the slicer, from the STLs already fetched into models-raw/
 // (same output as the app's "Pack" button, written to a folder instead of a zip):
-//   pack/<name>/stl/        one copy of every needed STL, named "<qty>x <set> - <file>.stl"
+//   pack/<name>/stl/<set>/<variant>/   one copy of every needed STL, named "<qty>x <file>.stl"
 //   pack/<name>/parts.csv   the parts list (same as the app's CSV export) + parts.txt
-//   pack/<name>/plates/     one .3mf per print plate: every instance arranged on the bed,
-//                           one colour per plate, objects carry their colour as a base material
+//   pack/<name>/plates/<colour>/       one .3mf per print plate: every instance arranged on the bed,
+//                           one folder per filament colour, objects carry their colour as a base material
 //
 //   node scripts/pack.mjs --sample smelting
 //   node scripts/pack.mjs --file my-blueprint.txt [--entry 2]

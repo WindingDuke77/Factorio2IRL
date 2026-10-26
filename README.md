@@ -133,8 +133,9 @@ photos:
 
 The **Pack** button next to the parts list opens a dialog (STL files and/or 3MF plates, plates
 grouped by colour, strictly by colour, by part type or mixed, gap and margin; the bed size comes
-from the printer chosen in Print options) and downloads a zip with one copy of every needed STL named with its quantity, the parts
-list, and one 3MF per print plate with the instances arranged on the bed. Parts larger than the
+from the printer chosen in Print options) and downloads a zip with one copy of every needed STL named with its quantity (a folder per
+Printables set and fit variant), the parts list, and a folder per filament colour holding one 3MF per
+print plate with the instances arranged on the bed. Parts larger than the
 bed get a plate of their own. It is built in the browser from the original STLs, which the dev server serves from `models-raw/` at `/stl/…` and
 `vite build` copies into `dist/stl` (`npm run fetch-models` first, which gets both fit variants; set `NO_STL=1` to skip the copy).
 `npm run pack -- --sample smelting` (or `--file my-blueprint.txt`) writes the same pack to a folder

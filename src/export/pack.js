@@ -1,8 +1,8 @@
 // Print pack: the files a slicer needs for a blueprint. Shared by the "Pack" button (browser) and
 // scripts/pack.mjs (node): callers supply how to load an STL and how to deflate bytes.
-//   stl/<qty>x <set> - <file>.stl   one copy of every needed STL
+//   stl/<set>/<variant folder>/<qty>x <file>.stl   one copy of every needed STL, laid out like Printables
 //   parts.csv, parts.txt, README.txt
-//   plates/plate-NN[-colour].3mf    every instance arranged on a bed, one colour per plate
+//   plates/<colour>/plate-NN.3mf    every instance arranged on a bed, one folder per filament colour
 //   plates/plates.txt               what is on each plate
 import { bomToCsv, bomToText } from '../bom/bom.js';
 import { readStl } from './stl.js';
@@ -24,7 +24,34 @@ export const PACK_DEFAULTS = {
 export const shortSet = (setName) => setName.replace(/^Factorio\s+/i, '');
 /** Path of a row's STL below models-raw/ or /stl/. */
 export const stlRelPath = (row) => `${row.set.setId}/${row.folder ? `${row.folder}/` : ''}${row.filename}`;
-export const stlPackName = (row) => `${row.qty}x ${shortSet(row.set.setName)} - ${row.filename}`;
+/** Pack path of a row's STL: stl/<set>/<variant folder>/<qty>x <file>. */
+export const stlPackName = (row) => `${shortSet(row.set.setName)}/${row.folder ? `${row.folder}/` : ''}${row.qty}x ${row.filename}`;
+/** Readable colour name for a #rrggbb hex, for folder names. */
+export function colourName(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (s < 0.15) return l < 0.2 ? 'black' : l < 0.4 ? 'dark grey' : l < 0.65 ? 'grey' : l < 0.85 ? 'light grey' : 'white';
+  let h = 0;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  if (h < 15 || h >= 345) return 'red';
+  if (h < 40) return 'orange';
+  if (h < 70) return 'yellow';
+  if (h < 170) return 'green';
+  if (h < 200) return 'cyan';
+  if (h < 260) return 'blue';
+  if (h < 300) return 'purple';
+  return 'pink';
+}
 /** Every parts-list row with its set attached. */
 export const packRows = (bom) => bom.sets.flatMap((set) => set.rows.map((r) => ({ ...r, set })));
 export const hexColour = (c) => `#${(c ?? 0x808080).toString(16).padStart(6, '0')}`;
@@ -103,7 +130,8 @@ export async function buildPackEntries({ bom, placements, label, loadStl, deflat
       onProgress(`Plate ${i + 1}/${plates.length}`);
       const plate = plates[i];
       const plateColours = [...new Set(plate.items.map((it) => it.colour))];
-      const fileName = `plate-${String(i + 1).padStart(2, '0')}${plateColours.length === 1 ? `-${plateColours[0].slice(1)}` : '-mixed'}.3mf`;
+      const folder = plateColours.length === 1 ? `${colourName(plateColours[0])} (${plateColours[0].slice(1)})` : 'mixed colours';
+      const fileName = `${folder}/plate-${String(i + 1).padStart(2, '0')}.3mf`;
       entries.push({ name: `plates/${fileName}`, data: await build3mf(plate, `${label} - plate ${i + 1}`, deflate, o.scale), store: true });
       const counts = new Map();
       for (const it of plate.items) counts.set(it.mesh.name, (counts.get(it.mesh.name) ?? 0) + 1);
@@ -114,7 +142,7 @@ export async function buildPackEntries({ bom, placements, label, loadStl, deflat
   }
   entries.push({
     name: 'README.txt',
-    data: `${label}\n\nstl/      one copy of every STL this blueprint needs; the number in front is how many to print.\nplates/   one 3MF per print plate with all instances arranged on a ${o.bedW} x ${o.bedH} mm bed${o.scale !== 1 ? ` at ${Math.round(o.scale * 100)}% scale (the STL files are at 100%)` : ''}, one colour per plate\n          (small colour groups share "mixed" plates). Open a plate in PrusaSlicer, Bambu Studio or OrcaSlicer, pick the filament, slice.\nparts.csv the parts list with Printables links.\n\nModels by Wube Software (CC BY-NC), https://www.printables.com/@WubeSoftware/models\n`,
+    data: `${label}\n\nstl/      one copy of every STL this blueprint needs, in a folder per Printables set and fit variant; the number in front is how many to print.\nplates/   a folder per filament colour with one 3MF per print plate, all instances arranged on a ${o.bedW} x ${o.bedH} mm bed${o.scale !== 1 ? ` at ${Math.round(o.scale * 100)}% scale (the STL files are at 100%)` : ''}, one colour per plate\n          (small colour groups share "mixed" plates). Open a plate in PrusaSlicer, Bambu Studio or OrcaSlicer, pick the filament, slice.\nparts.csv the parts list with Printables links.\n\nModels by Wube Software (CC BY-NC), https://www.printables.com/@WubeSoftware/models\n`,
   });
   return { entries, missing, plates, oversize: plates.filter((p) => p.oversize).length };
 }
