@@ -7,8 +7,8 @@
     "z": 0
   },
   "offset": {
-    "x": 0,
-    "y": 0,
+    "x": 0.05,
+    "y": 0.053,
     "z": 0
   },
   "stackOn": "belt/start-long-bottom",

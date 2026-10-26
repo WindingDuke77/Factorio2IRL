@@ -46,6 +46,10 @@ export function buildScenarios() {
     add(`${belt}-loop`, `${belt}: loop (4 turns)`, layout(`${belt} loop`, [
       [belt, -0.5, -0.5, 4], [belt, 0.5, -0.5, 8], [belt, 0.5, 0.5, 12], [belt, -0.5, 0.5, 0],
     ]));
+    // Straights with a left and a right turn: north, east, north again.
+    add(`${belt}-s-bend`, `${belt}: straight + curves (S-bend)`, layout(`${belt} s-bend`, [
+      [belt, 0.5, 2.5, 0], [belt, 0.5, 1.5, 0], [belt, 0.5, 0.5, 4], [belt, 1.5, 0.5, 4], [belt, 2.5, 0.5, 4], [belt, 3.5, 0.5, 0], [belt, 3.5, -0.5, 0], [belt, 3.5, -1.5, 0],
+    ]));
     add(`${belt}-sideload`, `${belt}: side-load`, layout(`${belt} sideload`, [[belt, 0.5, 1.5, 0], [belt, 0.5, 0.5, 0], [belt, 0.5, -0.5, 0], [belt, 1.5, 0.5, 12]]));
     add(`${ug}`, `${ug}: pair`, layout(`${ug}`, [[belt, 0.5, 2.5, 0], [ug, 0.5, 1.5, 0, { type: 'input' }], [ug, 0.5, -1.5, 0, { type: 'output' }], [belt, 0.5, -2.5, 0]]));
     add(`${sp}`, `${sp}: with belts`, layout(`${sp}`, [[belt, 0.5, 1.5, 0], [belt, 1.5, 1.5, 0], [sp, 1, 0.5, 0], [belt, 0.5, -0.5, 0], [belt, 1.5, -0.5, 0]]));

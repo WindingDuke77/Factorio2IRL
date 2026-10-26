@@ -1,14 +1,14 @@
 {
   "key": "belt/start-medium-top",
   "rotation": 12,
-  "tilt": {
+"tilt": {
     "x": 0,
     "y": 0,
     "z": 0
   },
   "offset": {
-    "x": 0,
-    "y": 0,
+    "x": 0.055,
+    "y": 0.033,
     "z": 0
   },
   "stackOn": "belt/start-medium-bottom",
