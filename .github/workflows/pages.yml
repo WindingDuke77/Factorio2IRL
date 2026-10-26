@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: models-raw
-          key: models-raw-${{ hashFiles('scripts/catalog.json') }}
+          key: models-raw-v2-${{ hashFiles('scripts/catalog.json') }}
       - name: Fetch the STLs from Printables
         if: steps.stl-cache.outputs.cache-hit != 'true'
         run: npm run fetch-models || echo "::warning::STL fetch failed; the site is built without the Pack download"

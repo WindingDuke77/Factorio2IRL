@@ -51,7 +51,7 @@ npm run models        # = fetch-models + convert-models
 - `scripts/build-catalog.mjs` queries the Printables API and writes `scripts/catalog.json`,
   mapping every one of the 247 STL files to a stable key (`belt/straight-top`, `tile/inserter`,
   `grid/4x6`, …). Only pieces used for rendering are marked `render: true`.
-- `scripts/fetch-models.mjs` downloads those STLs into `models-raw/` (git-ignored, ~120 MB).
+- `scripts/fetch-models.mjs` downloads those STLs into `models-raw/` (git-ignored, ~175 MB with both fit variants; the High Clearance files are only needed for the Pack download).
 - `scripts/convert-models.mjs` converts STL → GLB (Y-up, 1 tile = 1 unit, simplified to
   ≤ 40k triangles, meshopt-compressed) and writes `public/models/manifest.json`.
 
@@ -136,7 +136,7 @@ grouped by colour, strictly by colour, by part type or mixed, gap and margin; th
 from the printer chosen in Print options) and downloads a zip with one copy of every needed STL named with its quantity, the parts
 list, and one 3MF per print plate with the instances arranged on the bed. Parts larger than the
 bed get a plate of their own. It is built in the browser from the original STLs, which the dev server serves from `models-raw/` at `/stl/…` and
-`vite build` copies into `dist/stl` (`npm run fetch-models` first; set `NO_STL=1` to skip the copy).
+`vite build` copies into `dist/stl` (`npm run fetch-models` first, which gets both fit variants; set `NO_STL=1` to skip the copy).
 `npm run pack -- --sample smelting` (or `--file my-blueprint.txt`) writes the same pack to a folder
 from the command line, with flags for bed size, gap, plate grouping and the print options (header of
 `scripts/pack.mjs`). The shared code lives in `src/export/`.

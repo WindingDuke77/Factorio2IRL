@@ -1,5 +1,6 @@
-// Downloads every catalog entry marked render:true into models-raw/<setId>/<folder>/<filename>.
-// Usage: node scripts/fetch-models.mjs [--all]   (--all also fetches render:false entries)
+// Downloads the catalog entries the app uses into models-raw/<setId>/<folder>/<filename>: every
+// render:true entry plus the High Clearance variants (the Pack download needs those STLs too).
+// Usage: node scripts/fetch-models.mjs [--all]   (--all also fetches the decor sets)
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -46,7 +47,7 @@ async function downloadOne(entry) {
 async function main() {
   const all = process.argv.includes('--all');
   const catalog = JSON.parse(await fs.readFile(path.join(ROOT, 'scripts', 'catalog.json'), 'utf8'));
-  const todo = catalog.filter((e) => all || e.render);
+  const todo = catalog.filter((e) => all || e.render || e.variant === 'clearance');
   console.log(`${todo.length} files to check (${(todo.reduce((n, e) => n + e.fileSize, 0) / 1e6).toFixed(1)} MB)`);
 
   const counts = { downloaded: 0, skipped: 0, failed: 0 };
